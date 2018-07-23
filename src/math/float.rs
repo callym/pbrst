@@ -35,10 +35,10 @@ macro_rules! float_define {
 }
 
 #[cfg(not(feature = "double"))]
-float_define!(f32, R32, r32);
+float_define!(f32, N32, n32);
 
 #[cfg(feature = "double")]
-float_define!(f64, R64, r64);
+float_define!(f64, N64, n64);
 
 pub use self::float::*;
 

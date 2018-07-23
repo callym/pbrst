@@ -1,4 +1,5 @@
 use std::cmp::{ min, max };
+use std::mem;
 use std::ops::Add;
 use cg::prelude::*;
 use cg::{ BaseNum, Point2, Point3, Vector2, Vector3 };
@@ -278,5 +279,74 @@ impl Bounds3f {
         };
 
         (center.into_point(), radius)
+    }
+
+    pub fn intersect_p(&self, ray: Ray) -> Option<(Option<Float>, Option<Float>)> {
+        let mut t0 = float(0.0);
+        let mut t1 = ray.max.unwrap_or(Float::infinity());
+
+        let hit_t0: Option<Float> = None;
+        let hit_t1: Option<Float> = None;
+
+        for i in 0..3 {
+            // update interval for ith bb slab
+            let inv_ray_dir = 1.0 / ray.direction[i].raw();
+            let mut near = (self.min[i].raw() - ray.origin[i].raw()) * inv_ray_dir;
+            let mut far = (self.max[i].raw() - ray.origin[i].raw()) * inv_ray_dir;
+
+            if near > far {
+                mem::swap(&mut near, &mut far);
+            }
+
+            // update far to ensure robuse ray-bounds intersection
+
+            t0 = if near > t0.raw() { float(near) } else { t0 };
+            t1 = if far < t1.raw() { float(far) } else { t1 };
+
+            if t0 > t1 {
+                return None;
+            }
+        }
+
+        hit_t0.map(|_| t0);
+        hit_t1.map(|_| t1);
+
+        Some((hit_t0, hit_t1))
+    }
+
+    pub fn intersect_p_precomputed(&self, ray: Ray, inv_dir: Vector3f, dir_is_negative: [bool; 3]) -> bool {
+        let max = ray.max.unwrap_or(Float::infinity());
+
+        let is_neg = |neg: bool| if neg { self.max } else { self.min };
+        let mut tx_min = (is_neg(dir_is_negative[0]).x - ray.origin.x) * inv_dir.x;
+        let mut tx_max = (is_neg(!dir_is_negative[0]).x - ray.origin.x) * inv_dir.x;
+        let ty_min = (is_neg(dir_is_negative[1]).y - ray.origin.y) * inv_dir.y;
+        let ty_max = (is_neg(!dir_is_negative[1]).y - ray.origin.y) * inv_dir.y;
+        let tz_min = (is_neg(dir_is_negative[2]).z - ray.origin.z) * inv_dir.z;
+        let tz_max = (is_neg(!dir_is_negative[2]).z - ray.origin.z) * inv_dir.z;
+
+        // update t{n}max to ensure robust bounds intersection
+
+        if tx_min  > ty_max || ty_min > tx_max || tx_min > tx_max || tz_min > ty_max {
+            return false;
+        }
+
+        if ty_min > tx_min {
+            tx_min = ty_min;
+        }
+
+        if ty_max < tx_max {
+            tx_max = ty_max;
+        }
+
+        if tz_min > tx_min {
+            tx_min = tz_min;
+        }
+
+        if tz_max < tx_max {
+            tx_max = tz_max;
+        }
+
+        tx_min < max && tx_max > 0.0
     }
 }
