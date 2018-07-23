@@ -42,7 +42,7 @@ impl Interaction {
 
 #[derive(Clone, Debug, Shrinkwrap)]
 #[shrinkwrap(mutable)]
-pub struct SurfaceInteraction {
+pub struct SurfaceInteraction<'a> {
     #[shrinkwrap(main_field)]
     pub interaction: Interaction,
     pub uv: Point2f,
@@ -50,13 +50,13 @@ pub struct SurfaceInteraction {
     pub dpdv: Vector3f,
     pub dndu: Normal,
     pub dndv: Normal,
-    pub shape: Option<Arc<Shape>>,
+    pub shape: Option<&'a Shape>,
     pub shading: Shading,
     pub wo: Ray,
     pub bsdf: Arc<Bsdf>,
 }
 
-impl SurfaceInteraction {
+impl<'a> SurfaceInteraction<'a> {
     pub fn new(
         p: Point3f,
         p_err: Vector3f,
@@ -67,7 +67,7 @@ impl SurfaceInteraction {
         dndu: Normal,
         dndv: Normal,
         time: Float,
-        shape: Option<Arc<Shape>>
+        shape: Option<&'a Shape>
     ) -> Self {
         let mut n: Normal = dpdu.cross(dpdv).normalize().into();
 

@@ -7,6 +7,9 @@ pub use self::consts::*;
 pub mod derivative;
 pub use self::derivative::*;
 
+pub mod efloat;
+pub use self::efloat::*;
+
 pub mod float;
 pub use self::float::*;
 
@@ -18,6 +21,9 @@ pub use self::normal::*;
 
 pub mod point;
 pub use self::point::*;
+
+pub mod quadratic;
+pub use self::quadratic::*;
 
 pub mod ray;
 pub use self::ray::*;

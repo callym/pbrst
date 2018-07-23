@@ -8,7 +8,7 @@ pub struct RayData {
 }
 
 impl RayData {
-    pub fn p(&self, t: Float) -> Point3f {
+    pub fn position(&self, t: Float) -> Point3f {
         self.origin + self.direction * t
     }
 }

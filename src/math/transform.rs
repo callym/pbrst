@@ -84,9 +84,17 @@ impl Transform {
         }
     }
 
+    pub fn transform_ray_data_with_error(&self, _: RayData, _: Vector3f, _: Vector3f) -> (RayData, Vector3f, Vector3f) {
+        unimplemented!()
+    }
+
     pub fn transform_ray(&self, mut ray: Ray) -> Ray {
         ray.ray = self.transform_ray_data(ray.ray);
         ray
+    }
+
+    pub fn transform_ray_with_error(&self, _: Ray, _: Vector3f, _: Vector3f) -> (Ray, Vector3f, Vector3f) {
+        unimplemented!()
     }
 
     pub fn transform_ray_differential(&self, mut ray: RayDifferential) -> RayDifferential {
@@ -94,6 +102,10 @@ impl Transform {
         ray.x = ray.x.map(|x| self.transform_ray_data(x));
         ray.y = ray.y.map(|y| self.transform_ray_data(y));
         ray
+    }
+
+    pub fn transform_ray_differential_with_error(&self, _: RayDifferential, _: Vector3f, _: Vector3f) -> (RayDifferential, Vector3f, Vector3f) {
+        unimplemented!()
     }
 
     // todo - this can be more efficient
