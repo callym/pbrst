@@ -1,0 +1,83 @@
+use std::cmp;
+use std::sync::Arc;
+use cg::Vector3;
+use num_cpus;
+use rayon::prelude::*;
+
+use ::{
+    camera::Camera,
+    math::*,
+    sampler::Sampler,
+    scene::Scene,
+};
+use super::SamplerIntegrator;
+
+pub struct WhittedIntegrator {
+    max_depth: i32,
+    camera: Arc<Camera>,
+    sampler: Box<Sampler>,
+}
+
+impl WhittedIntegrator {
+    fn new(max_depth: i32, camera: Arc<Camera>, sampler: Box<Sampler>, pixel_bounds: Bounds2<i32>) -> Self {
+        Self {
+            max_depth,
+            camera,
+            sampler,
+        }
+    }
+}
+
+impl SamplerIntegrator for WhittedIntegrator {
+    fn camera(&self) -> Arc<Camera> {
+        self.camera.clone()
+    }
+
+    fn sampler(&self) -> &Box<Sampler> {
+        &self.sampler
+    }
+
+    fn sampler_mut(&mut self) -> &mut Box<Sampler> {
+        &mut self.sampler
+    }
+
+    fn li(&mut self, ray: RayDifferential, scene: &Scene, sampler: &mut Box<Sampler>, arena: &(), depth: i32) -> Spectrum {
+        let mut l = Spectrum::new(0.0);
+
+        if let Some(isect) = scene.intersect(&ray) {
+            // initialise common variables for Whitted
+            let n = isect.shading.n;
+            let wo = isect.wo;
+
+            // compute scattering fn for surface interaction
+            isect.compute_scattering_functions(&ray, &arena);
+
+            // compute emitted light if ray hit area light source
+            l += isect.le(&wo);
+
+            // add contribution of each light source
+            for light in scene.lights.iter() {
+                let (sample, _) = light.sample_li(&isect, sampler.get_2d());
+
+                if sample.li.is_black() || sample.pdf == 0.0 {
+                    continue;
+                }
+
+                let f = isect.bsdf.f(wo, sample.wi);
+            }
+
+            if depth + 1 < self.max_depth {
+                // trace rays for specular reflection & refraction
+                l += super::utils::specular_reflect(self, &ray, &isect, &scene, sampler, &arena, depth);
+                l += super::utils::specular_transmit(self, &ray, &isect, &scene, sampler, &arena, depth);
+            }
+
+        } else {
+            for light in scene.lights.iter() {
+                l += light.le(&ray);
+            }
+        }
+
+        l
+    }
+}
