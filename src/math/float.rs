@@ -66,8 +66,8 @@ impl Float {
         self.powi(n)
     }
 
-    pub fn lerp(self, o: Self, t: Self) -> Self {
-        (float(1.0) - t) * self + float(1.0) * o
+    pub fn lerp(self, other: Self, amount: Self) -> Self {
+        (float(1.0) - amount) * self + float(1.0) * other
     }
 }
 

@@ -2,6 +2,7 @@
     const_fn,
     macro_at_most_once_rep,
     nll,
+    slice_patterns,
     try_from,
     underscore_imports
 )]
@@ -9,6 +10,8 @@
 #[macro_use] extern crate bitflags;
 extern crate cgmath as cg;
 #[macro_use] extern crate derive_more;
+#[macro_use] extern crate itertools;
+#[macro_use] extern crate lazy_static;
 extern crate noisy_float;
 extern crate num;
 extern crate num_cpus;
@@ -25,11 +28,16 @@ pub mod primitive;
 pub mod sampler;
 pub mod scene;
 pub mod shape;
+pub mod spectrum;
 
 pub mod prelude {
     use cg;
     pub use num::Float as _;
     pub use math::*;
+    use super::spectrum;
+
+    pub use spectrum::Spectrum as _;
+    pub type Spectrum = spectrum::RgbSpectrum;
 
     pub type Bounds2f = Bounds2<Float>;
     pub type Bounds2i = Bounds2<i32>;

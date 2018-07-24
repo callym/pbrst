@@ -524,7 +524,7 @@ impl AnimatedTransform {
             let (num_zero, zeros) = self.terms_of_motion.interval_find_zeros(c, p, theta, Interval::new(float(0.0), float(1.0)), 8);
 
             for i in 0..num_zero {
-                let pz = self.transform_point(zeros[i].lerp(self.start_time, self.end_time), p);
+                let pz = self.transform_point(self.start_time.lerp(self.end_time, zeros[i]), p);
                 bounds = bounds.union_p(pz);
             }
         }

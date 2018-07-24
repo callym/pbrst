@@ -85,13 +85,10 @@ pub trait SamplerIntegrator: Integrator {
                                 l = self.li(ray, scene, &mut tile_sampler, &arena, 0);
                             }
 
-                            if l.has_nans() {
-                                // ERROR
-                                l = Spectrum::new(0.0);
-                            } else if l.y() < -1e-5 {
+                            if l.y() < -1e-5 {
                                 // NEGATIVE
                                 l = Spectrum::new(0.0);
-                            } else if (l.y().is_infinite()) {
+                            } else if l.y().is_infinite() {
                                 // INFINITE
                                 l = Spectrum::new(0.0);
                             }

@@ -28,9 +28,6 @@ pub use self::quadratic::*;
 pub mod ray;
 pub use self::ray::*;
 
-pub mod spectrum;
-pub use self::spectrum::*;
-
 pub(crate) mod terms_of_motion;
 pub(crate) use self::terms_of_motion::*;
 
