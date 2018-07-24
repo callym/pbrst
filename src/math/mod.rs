@@ -25,6 +25,9 @@ pub use self::point::*;
 pub mod quadratic;
 pub use self::quadratic::*;
 
+pub mod radiometry;
+pub use self::radiometry::*;
+
 pub mod ray;
 pub use self::ray::*;
 
