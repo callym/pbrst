@@ -1,11 +1,16 @@
 use std::{
     self,
-    cmp::{ PartialEq, PartialOrd, Ordering },
+    cmp::{ PartialEq, PartialOrd, Ordering, min, max },
     num::FpCategory,
-    ops::{ Mul, Div, Rem, Neg, MulAssign, DivAssign, RemAssign },
+    ops::{
+        Add, Sub,
+        AddAssign, SubAssign,
+        Mul, Div, Rem, Neg,
+        MulAssign, DivAssign, RemAssign,
+    },
 };
 use cg::ApproxEq;
-use noisy_float::types::{ R32, r32 };
+use noisy_float::types::{ R64, r64 };
 use num;
 use num::Float as NumFloat;
 use num::traits::{ Bounded, Num, One, Zero };
@@ -13,31 +18,78 @@ use num::traits::ParseFloatError;
 use prelude::*;
 
 #[derive(
-    Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd,
-    Add, Sub, Mul, Div, Rem,
-    AddAssign, SubAssign,
+    Copy, Clone, Debug,
     Shrinkwrap
 )]
 #[shrinkwrap(mutable, unsafe_ignore_visibility)]
-pub struct Efloat(Float);
+pub struct Efloat {
+    #[shrinkwrap(main_field)]
+    v: Float,
+    low: Float,
+    high: Float,
+    #[cfg(debug_assertions)]
+    v_precise: R64,
+}
 
 pub fn efloat0(f: impl Into<Float>) -> Efloat {
     efloat(f, 0.0)
 }
 
-pub fn efloat(f: impl Into<Float>, _err: impl Into<Float>) -> Efloat {
-    let f: Float = f.into();
-    Efloat(f)
+pub fn efloat(v: impl Into<Float>, err: impl Into<Float>) -> Efloat {
+    let v: Float = v.into();
+    let err: Float = err.into();
+
+    let (low, high) = if err == 0.0 {
+        (v, v)
+    } else {
+        (float(next_float_down(v - err)), float(next_float_up(v + err)))
+    };
+
+    Efloat {
+        v,
+        low,
+        high,
+        #[cfg(debug_assertions)]
+        v_precise: r64(v.raw() as f64),
+    }
 }
 
-
 impl Efloat {
-    pub fn lower_bound(&self) -> Self {
-        unimplemented!()
+    #[inline(always)]
+    pub fn check(&self) {
+        #[cfg(debug_assertions)] {
+            if self.low.is_finite() && self.high.is_finite() {
+                debug_assert!(self.low <= self.high);
+            }
+
+            if self.v.is_finite() {
+                debug_assert!(self.lower_bound().raw() as f64 <= self.v_precise.raw());
+                debug_assert!(self.v_precise.raw() <= self.upper_bound().raw() as f64);
+            }
+        }
     }
 
-    pub fn upper_bound(&self) -> Self {
-        unimplemented!()
+    pub fn absolute_error(&self) -> Float {
+        self.high - self.low
+    }
+
+    #[cfg(debug_assertions)]
+    pub fn relative_error(&self) -> Float {
+        let f = ((self.v_precise - r64(self.v.raw() as f64)) / self.v_precise).abs();
+        float(f.raw() as f32)
+    }
+
+    #[cfg(debug_assertions)]
+    pub fn precise_value(&self) -> f64 {
+        self.v_precise.raw()
+    }
+
+    pub fn lower_bound(&self) -> Float {
+        self.low
+    }
+
+    pub fn upper_bound(&self) -> Float {
+        self.high
     }
 
     pub fn pow(self, n: i32) -> Self {
@@ -47,12 +99,23 @@ impl Efloat {
     pub fn lerp(self, o: Self, t: Self) -> Self {
         (efloat(1.0, 0.0) - t) * self + efloat(1.0, 0.0) * o
     }
+
+    pub fn raw(self) -> FloatPrim {
+        self.v.raw()
+    }
 }
 
 impl From<FloatPrim> for Efloat {
     #[inline(always)]
     fn from(f: FloatPrim) -> Self {
         efloat(f, 0.0)
+    }
+}
+
+impl Into<FloatPrim> for Efloat {
+    #[inline(always)]
+    fn into(self) -> FloatPrim {
+        self.raw()
     }
 }
 
@@ -77,12 +140,12 @@ impl ApproxEq for Efloat {
 
     #[inline(always)]
     fn relative_eq(&self, other: &Self, epsilon: Self, max_relative: Self) -> bool {
-        <FloatPrim as ApproxEq>::relative_eq(&(*self).raw(), &other.0.raw(), epsilon.0.raw(), max_relative.0.raw())
+        <FloatPrim as ApproxEq>::relative_eq(&(*self).raw(), &other.v.raw(), epsilon.v.raw(), max_relative.v.raw())
     }
 
     #[inline(always)]
     fn ulps_eq(&self, other: &Self, epsilon: Self, max_ulps: u32) -> bool {
-        <FloatPrim as ApproxEq>::ulps_eq(&(*self).raw(), &other.0.raw(), epsilon.0.raw(), max_ulps)
+        <FloatPrim as ApproxEq>::ulps_eq(&(*self).raw(), &other.v.raw(), epsilon.v.raw(), max_ulps)
     }
 }
 
@@ -145,6 +208,8 @@ impl num::NumCast for Efloat {
     }
 }
 
+impl Eq for Efloat { }
+
 impl PartialEq<FloatPrim> for Efloat {
     #[inline(always)]
     fn eq(&self, other: &FloatPrim) -> bool {
@@ -159,18 +224,116 @@ impl PartialOrd<FloatPrim> for Efloat {
     }
 }
 
+impl PartialEq<FloatNoisy> for Efloat {
+    #[inline(always)]
+    fn eq(&self, other: &FloatNoisy) -> bool {
+        self.eq(&efloat(*other, 0.0))
+    }
+}
+
+impl PartialOrd<FloatNoisy> for Efloat {
+    #[inline(always)]
+    fn partial_cmp(&self, other: &FloatNoisy) -> Option<Ordering> {
+        self.partial_cmp(&efloat(*other, 0.0))
+    }
+}
+
+impl PartialEq<Efloat> for Efloat {
+    #[inline(always)]
+    fn eq(&self, other: &Efloat) -> bool {
+        self.v.eq(&other.v)
+    }
+}
+
+impl PartialOrd<Efloat> for Efloat {
+    #[inline(always)]
+    fn partial_cmp(&self, other: &Efloat) -> Option<Ordering> {
+        self.v.partial_cmp(&other.v)
+    }
+}
+
+impl Add for Efloat {
+    type Output = Self;
+    #[inline(always)]
+    fn add(self, rhs: Self) -> Self {
+        let mut r = efloat0(self.v + rhs.v);
+
+        #[cfg(debug_assertions)] {
+            r.v_precise = self.v_precise + rhs.v_precise;
+        }
+
+        r.low = next_float_down(self.lower_bound() + rhs.lower_bound()).into();
+        r.high = next_float_up(self.upper_bound() + rhs.upper_bound()).into();
+
+        r.check();
+
+        r
+    }
+}
+
+impl AddAssign for Efloat {
+    #[inline(always)]
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
+    }
+}
+
+impl Sub for Efloat {
+    type Output = Self;
+    #[inline(always)]
+    fn sub(self, rhs: Self) -> Self {
+        let mut r = efloat0(self.v - rhs.v);
+
+        #[cfg(debug_assertions)] {
+            r.v_precise = self.v_precise - rhs.v_precise;
+        }
+
+        r.low = next_float_down(self.lower_bound() - rhs.upper_bound()).into();
+        r.high = next_float_up(self.upper_bound() + rhs.lower_bound()).into();
+
+        r.check();
+
+        r
+    }
+}
+
+impl SubAssign for Efloat {
+    #[inline(always)]
+    fn sub_assign(&mut self, rhs: Self) {
+        *self = *self - rhs;
+    }
+}
+
 impl Mul for Efloat {
     type Output = Self;
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
-        efloat(self.0 * rhs.0, 0.0)
+        let mut r = efloat0(self.v * rhs.v);
+
+        #[cfg(debug_assertions)] {
+            r.v_precise = self.v_precise * rhs.v_precise;
+        }
+
+        let prod = [
+            self.lower_bound() * rhs.lower_bound(),
+            self.upper_bound() * rhs.lower_bound(),
+            self.lower_bound() * rhs.upper_bound(),
+            self.upper_bound() * rhs.upper_bound(),
+        ];
+
+        r.low = *prod.iter().min().unwrap();
+        r.high = *prod.iter().max().unwrap();
+
+        r.check();
+
+        r
     }
 }
 
 impl MulAssign for Efloat {
     #[inline(always)]
     fn mul_assign(&mut self, rhs: Self) {
-        self.0 *= rhs.0;
+        *self = *self * rhs;
     }
 }
 
@@ -178,14 +341,37 @@ impl Div for Efloat {
     type Output = Self;
     #[inline(always)]
     fn div(self, rhs: Self) -> Self {
-        efloat(self.0 / rhs.0, 0.0)
+        let mut r = efloat0(self.v / rhs.v);
+
+        #[cfg(debug_assertions)] {
+            r.v_precise = self.v_precise / rhs.v_precise;
+        }
+
+        if rhs.low < 0.0 && rhs.high > 0.0 {
+            r.low = Float::neg_infinity();
+            r.high = Float::infinity();
+        } else {
+            let prod = [
+                self.lower_bound() / rhs.lower_bound(),
+                self.upper_bound() / rhs.lower_bound(),
+                self.lower_bound() / rhs.upper_bound(),
+                self.upper_bound() / rhs.upper_bound(),
+            ];
+
+            r.low = *prod.iter().min().unwrap();
+            r.high = *prod.iter().max().unwrap();
+        }
+
+        r.check();
+
+        r
     }
 }
 
 impl DivAssign for Efloat {
     #[inline(always)]
     fn div_assign(&mut self, rhs: Self) {
-        self.0 /= rhs.0;
+        *self = *self / rhs;
     }
 }
 
@@ -193,14 +379,14 @@ impl Rem for Efloat {
     type Output = Self;
     #[inline(always)]
     fn rem(self, rhs: Self) -> Self {
-        efloat(self.0 % rhs.0, 0.0)
+        efloat(self.v % rhs.v, 0.0)
     }
 }
 
 impl RemAssign for Efloat {
     #[inline(always)]
     fn rem_assign(&mut self, rhs: Self) {
-        self.0 %= rhs.0;
+        *self = *self % rhs;
     }
 }
 
@@ -208,7 +394,15 @@ impl Neg for Efloat {
     type Output = Self;
     #[inline(always)]
     fn neg(self) -> Self {
-        efloat(-(*self).raw(), 0.0)
+        let mut r = self;
+        r.v = -self.v;
+        #[cfg(debug_assertions)] {
+            r.v_precise = -self.v_precise;
+        }
+        r.low = -self.high;
+        r.high = -self.low;
+        r.check();
+        r
     }
 }
 
@@ -300,7 +494,37 @@ impl NumFloat for Efloat {
 
     #[inline(always)]
     fn abs(self) -> Self {
-        efloat((*self).abs(), 0.0)
+        if self.low >= 0.0 {
+            self
+        } else if self.high <= 0.0 {
+            let mut r = self;
+            r.v = -self.v;
+
+            #[cfg(debug_assertions)] {
+                r.v_precise = -r.v_precise;
+            }
+
+            r.low = -self.high;
+            r.high = -self.low;
+
+            r.check();
+
+            r
+        } else {
+            let mut r = self;
+            r.v = self.v.abs();
+
+            #[cfg(debug_assertions)] {
+                r.v_precise = self.v_precise.abs();
+            }
+
+            r.low = float(0.0);
+            r.high = max(-self.low, self.high);
+
+            r.check();
+
+            r
+        }
     }
 
     #[inline(always)]
@@ -320,7 +544,7 @@ impl NumFloat for Efloat {
 
     #[inline(always)]
     fn mul_add(self, a: Self, b: Self) -> Self {
-        efloat((*self).mul_add(a.0, b.0), 0.0)
+        efloat((*self).mul_add(a.v, b.v), 0.0)
     }
 
     #[inline(always)]
@@ -340,7 +564,18 @@ impl NumFloat for Efloat {
 
     #[inline(always)]
     fn sqrt(self) -> Self {
-        efloat((*self).sqrt(), 0.0)
+        let mut r = efloat0(self.v.sqrt());
+
+        #[cfg(debug_assertions)] {
+            r.v_precise = self.v_precise.sqrt();
+        }
+
+        r.low = next_float_down(self.low.sqrt()).into();
+        r.high = next_float_up(self.high.sqrt()).into();
+
+        r.check();
+
+        r
     }
 
     #[inline(always)]
@@ -375,12 +610,12 @@ impl NumFloat for Efloat {
 
     #[inline(always)]
     fn max(self, other: Self) -> Self {
-        efloat((*self).raw().max(other.0.raw()), 0.0)
+        efloat((*self).raw().max(other.v.raw()), 0.0)
     }
 
     #[inline(always)]
     fn min(self, other: Self) -> Self {
-        efloat((*self).raw().min(other.0.raw()), 0.0)
+        efloat((*self).raw().min(other.v.raw()), 0.0)
     }
 
     #[inline(always)]

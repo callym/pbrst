@@ -78,6 +78,27 @@ impl From<FloatPrim> for Float {
     }
 }
 
+impl Into<FloatPrim> for Float {
+    #[inline(always)]
+    fn into(self) -> FloatPrim {
+        self.raw()
+    }
+}
+
+impl From<FloatNoisy> for Float {
+    #[inline(always)]
+    fn from(f: FloatNoisy) -> Self {
+        Float(f)
+    }
+}
+
+impl Into<FloatNoisy> for Float {
+    #[inline(always)]
+    fn into(self) -> FloatNoisy {
+        self.0
+    }
+}
+
 impl ApproxEq for Float {
     type Epsilon = Self;
 

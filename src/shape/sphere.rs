@@ -59,7 +59,7 @@ impl Shape for Sphere {
 
         let o_err = Vector3f::zero();
         let d_err = Vector3f::zero();
-        let (ray, o_err, d_err) = self.shape_data.world_to_object.transform_ray_with_error(*ray, o_err, d_err);
+        let (ray, o_err, d_err) = self.shape_data.world_to_object.transform_ray_with_error(*ray);
 
         let dx = efloat(ray.direction.x, d_err.x);
         let dy = efloat(ray.direction.y, d_err.y);
@@ -79,25 +79,22 @@ impl Shape for Sphere {
 
         let max = ray.max.unwrap_or(Float::infinity());
 
-        if *t0.upper_bound() > max || t1.map_or(false, |f| f.lower_bound() <= 0.0) {
+        if t0.upper_bound() > max || t1.lower_bound() <= 0.0 {
             return None;
         }
 
         let mut shape_hit = t0;
         if shape_hit.lower_bound() <= 0.0 {
-            shape_hit = match t1 {
-                Some(t1) => t1,
-                None => return None,
-            };
+            shape_hit = t1;
 
-            if *shape_hit.upper_bound() > max {
+            if shape_hit.upper_bound() > max {
                 return None;
             }
         }
 
         let mut p_hit = ray.position(*shape_hit);
 
-        // refine sphere intersection point
+        p_hit *= self.radius / Point3f::zero().distance(p_hit);
 
         if p_hit.x == 0.0 && p_hit.y == 0.0 {
             p_hit.x = float(1e-5) * self.radius;
@@ -115,21 +112,19 @@ impl Shape for Sphere {
         };
 
         if test(p_hit) {
-            if let Some(t1) = t1 {
-                if shape_hit == t1 {
-                    return None;
-                }
+            if shape_hit == t1 {
+                return None;
+            }
 
-                if *t1.upper_bound() > max {
-                    return None;
-                }
+            if t1.upper_bound() > max {
+                return None;
+            }
 
-                shape_hit = t1;
-                let p_hit = ray.position(*shape_hit);
+            shape_hit = t1;
+            let p_hit = ray.position(*shape_hit);
 
-                if test(p_hit) {
-                    return None;
-                }
+            if test(p_hit) {
+                return None;
             }
         }
 
@@ -154,8 +149,8 @@ impl Shape for Sphere {
             -self.radius * theta.sin(),
         ) * (self.theta_max - self.theta_min);
 
-        let d2Pduu = Vector3f::new(p_hit.x, p_hit.y, float(0.0)) * -self.phi_max.powi(2);
-        let d2Pduv = Vector3f::new(-sin_phi, cos_phi, float(0.0)) *
+        let d2pduu = Vector3f::new(p_hit.x, p_hit.y, float(0.0)) * -self.phi_max.powi(2);
+        let d2pduv = Vector3f::new(-sin_phi, cos_phi, float(0.0)) *
             (self.theta_max - self.theta_min) * p_hit.z * self.phi_max;
         let d2pdvv = p_hit.into_vector() * -(self.theta_max - self.theta_min).powi(2);
 
@@ -163,8 +158,8 @@ impl Shape for Sphere {
         let F = dpdu.dot(dpdv);
         let G = dpdv.dot(dpdv);
         let N = dpdu.cross(dpdv).normalize();
-        let e = N.dot(d2Pduu);
-        let f = N.dot(d2Pduv);
+        let e = N.dot(d2pduu);
+        let f = N.dot(d2pduv);
         let g = N.dot(d2pdvv);
 
         let invEGF2 = float(1.0) / E * G - F.powi(2);
@@ -174,7 +169,7 @@ impl Shape for Sphere {
             dpdv * (f * F - g * E) * invEGF2).into();
 
         // compute error bounds
-        let p_err = Vector3f::zero();
+        let p_err = p_hit.abs().into_vector() * gammaf(5);
 
         let interaction = SurfaceInteraction::new(
             p_hit,

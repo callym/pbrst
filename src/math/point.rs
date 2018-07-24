@@ -1,6 +1,6 @@
 use std::cmp::{ min, max };
 use num::Float as NumFloat;
-use num::traits::Zero as _;
+use num::traits::Zero as Zero;
 use num::integer::Roots as _;
 use cg::prelude::*;
 use cg::{ Point2, Point3, Vector2, Vector3 };
@@ -17,19 +17,28 @@ pub trait PointExt: Sized {
 }
 
 pub trait PointExtFloat: Sized {
-    fn floor(self) -> Self { self }
-    fn ceil(self) -> Self { self }
-    fn abs(self) -> Self { self }
+    fn floor(self) -> Self;
+    fn ceil(self) -> Self;
+    fn abs(self) -> Self;
 
     fn lerp(self, other: Self, amount: Float) -> Self;
 }
 
 pub trait PointExt2d: PointExt {
+    fn zero() -> Self where Self::Element: Zero;
     fn into_vector(self) -> Vector2<Self::Element>;
     fn permute(self, x: Dim, y: Dim) -> Self;
 }
 
 impl<T> PointExt2d for Point2<T> where Point2<T>: PointExt<Element = T>, T: Copy {
+    #[inline(always)]
+    fn zero() -> Self where Self::Element: Zero {
+        Self::new(
+            Self::Element::zero(),
+            Self::Element::zero(),
+        )
+    }
+
     #[inline(always)]
     fn into_vector(self) -> Vector2<T> {
         Vector2::new(self.x, self.y)
@@ -45,11 +54,21 @@ impl<T> PointExt2d for Point2<T> where Point2<T>: PointExt<Element = T>, T: Copy
 }
 
 pub trait PointExt3d: PointExt {
+    fn zero() -> Self where Self::Element: Zero;
     fn into_vector(self) -> Vector3<Self::Element>;
     fn permute(self, x: Dim, y: Dim, z: Dim) -> Self;
 }
 
 impl<T> PointExt3d for Point3<T> where Point3<T>: PointExt<Element = T>, T: Copy {
+    #[inline(always)]
+    fn zero() -> Self where Self::Element: Zero {
+        Self::new(
+            Self::Element::zero(),
+            Self::Element::zero(),
+            Self::Element::zero(),
+        )
+    }
+
     #[inline(always)]
     fn into_vector(self) -> Vector3<T> {
         Vector3::new(self.x, self.y, self.z)

@@ -38,6 +38,27 @@ impl Interaction {
     pub fn is_surface_interaction(&self) -> bool {
         self.n.is_some()
     }
+
+    pub fn spawn_ray(&self, dir: &Vector3f) -> Ray {
+        let n = self.n.unwrap_or(Normal::zero());
+        let o = offset_ray_origin(&self.p, &self.p_err, &n, dir);
+
+        let mut ray = Ray::new(o, *dir);
+        ray.time = self.time;
+        ray
+    }
+
+    pub fn spawn_ray_to(&self, p: &Point3f) -> Ray {
+        let n = self.n.unwrap_or(Normal::zero());
+        let o = offset_ray_origin(&self.p, &self.p_err, &n, &(p - self.p));
+        let d = p - o;
+
+        let mut ray = Ray::new(o, d);
+        ray.max = Some(float(1.0 - SHADOW_EPSILON));
+        ray.time = self.time;
+        // todo: ray.medium = GetMedium(d);
+        ray
+    }
 }
 
 #[derive(Clone, Debug, Shrinkwrap)]

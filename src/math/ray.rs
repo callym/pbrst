@@ -1,5 +1,27 @@
 use cg;
+use cg::prelude::*;
 use prelude::*;
+
+pub fn offset_ray_origin(p: &Point3f, p_err: &Vector3f, n: &Normal, w: &Vector3f) -> Point3f {
+    let d = (**n).abs().dot(*p_err);
+    let mut offset = (**n) * d;
+
+    if w.dot(**n) < 0.0 {
+        offset = -offset;
+    }
+
+    let mut p_o = p + offset;
+
+    for i in 0..3 {
+        if offset[i] > 0.0 {
+            p_o[i] = next_float_up_f(p_o[i]);
+        } else if offset[i] < 0.0 {
+            p_o[i] = next_float_down_f(p_o[i]);
+        }
+    }
+
+    p_o
+}
 
 #[derive(Copy, Clone, Debug)]
 pub struct RayData {
@@ -13,11 +35,10 @@ impl RayData {
     }
 }
 
-#[derive(Copy, Clone, Debug, Shrinkwrap)]
-#[shrinkwrap(mutable)]
+#[derive(Copy, Clone, Debug)]
 pub struct Ray {
-    #[shrinkwrap(main_field)]
-    pub ray: RayData,
+    pub origin: Point3f,
+    pub direction: Vector3f,
     pub max: Option<Float>,
     pub time: Float,
     pub medium: Option<()>,
@@ -26,14 +47,16 @@ pub struct Ray {
 impl Ray {
     pub fn new(origin: Point3f, direction: Vector3f) -> Self {
         Self {
-            ray: RayData {
-                origin,
-                direction,
-            },
+            origin,
+            direction,
             max: None,
             time: float(0.0),
             medium: None,
         }
+    }
+
+    pub fn position(&self, t: Float) -> Point3f {
+        self.origin + self.direction * t
     }
 }
 

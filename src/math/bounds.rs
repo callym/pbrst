@@ -299,6 +299,7 @@ impl Bounds3f {
             }
 
             // update far to ensure robuse ray-bounds intersection
+            far *= 1.0 + 2.0 * gamma(3);
 
             t0 = if near > t0.raw() { float(near) } else { t0 };
             t1 = if far < t1.raw() { float(far) } else { t1 };
@@ -321,11 +322,13 @@ impl Bounds3f {
         let mut tx_min = (is_neg(dir_is_negative[0]).x - ray.origin.x) * inv_dir.x;
         let mut tx_max = (is_neg(!dir_is_negative[0]).x - ray.origin.x) * inv_dir.x;
         let ty_min = (is_neg(dir_is_negative[1]).y - ray.origin.y) * inv_dir.y;
-        let ty_max = (is_neg(!dir_is_negative[1]).y - ray.origin.y) * inv_dir.y;
+        let mut ty_max = (is_neg(!dir_is_negative[1]).y - ray.origin.y) * inv_dir.y;
         let tz_min = (is_neg(dir_is_negative[2]).z - ray.origin.z) * inv_dir.z;
-        let tz_max = (is_neg(!dir_is_negative[2]).z - ray.origin.z) * inv_dir.z;
+        let mut tz_max = (is_neg(!dir_is_negative[2]).z - ray.origin.z) * inv_dir.z;
 
-        // update t{n}max to ensure robust bounds intersection
+        tx_max  *= float(1.0 + 2.0 * gamma(3));
+        ty_max  *= float(1.0 + 2.0 * gamma(3));
+        tz_max  *= float(1.0 + 2.0 * gamma(3));
 
         if tx_min  > ty_max || ty_min > tx_max || tx_min > tx_max || tz_min > ty_max {
             return false;

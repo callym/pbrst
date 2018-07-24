@@ -61,12 +61,64 @@ impl Transform {
         self.matrix.transform_point(point)
     }
 
-    pub fn transform_point_with_abs_error(&self, _: Point3f, _: Vector3f) -> (Point3f, Vector3f) {
-        unimplemented!()
+    pub fn transform_point_with_error(&self, p: Point3f) -> (Point3f, Vector3f) {
+        let Point3f { x, y, z } = p;
+        let p = self.transform_point(p);
+        let m = self.matrix;
+
+        let err = |n: usize| {
+            ((m[0][n] * x).abs() + (m[1][n] * y).abs() + (m[2][n] * z).abs() + m[3][n].abs())
+        };
+
+        let mut abs = Vector3f::zero();
+        abs.x = err(0);
+        abs.y = err(1);
+        abs.z = err(2);
+        abs *= gammaf(3);
+
+        (p, abs)
+    }
+
+    pub fn transform_point_with_abs_error(&self, p: Point3f, p_err: Vector3f) -> (Point3f, Vector3f) {
+        let Point3f { x, y, z } = p;
+        let p = self.transform_point(p);
+        let m = self.matrix;
+
+        let err = |n: usize| {
+            (gammaf(3) + float(1.0)) *
+            (m[0][n].abs() * p_err.x + m[1][n].abs() * p_err.x + m[2][n].abs() * p_err.z) +
+            (gammaf(3)) *
+            ((m[0][n] * x).abs() + (m[1][n] * y).abs() + (m[2][n] * z).abs() + m[3][n].abs())
+        };
+
+        let mut abs = Vector3f::zero();
+        abs.x = err(0);
+        abs.y = err(1);
+        abs.z = err(2);
+
+        (p, abs)
     }
 
     pub fn transform_vector(&self, vector: Vector3f) -> Vector3f {
         self.matrix.transform_vector(vector)
+    }
+
+    pub fn transform_vector_with_error(&self, v: Vector3f) -> (Vector3f, Vector3f) {
+        let Vector3f { x, y, z } = v;
+        let v = self.transform_vector(v);
+        let m = self.matrix;
+
+        let err = |n: usize| {
+            ((m[0][n] * x).abs() + (m[1][n] * y).abs() + (m[2][n] * z).abs() + m[3][n].abs())
+        };
+
+        let mut abs = Vector3f::zero();
+        abs.x = err(0);
+        abs.y = err(1);
+        abs.z = err(2);
+        abs *= gammaf(3);
+
+        (v, abs)
     }
 
     pub fn transform_normal(&self, normal: Normal) -> Normal {
@@ -77,24 +129,53 @@ impl Transform {
     pub fn transform_ray_data(&self, ray: RayData) -> RayData {
         let origin = self.transform_point(ray.origin);
         let direction = self.transform_vector(ray.direction);
-        // Offset ray origin to the edge of error bounds and compute tMax
+
         RayData {
             origin,
             direction,
         }
     }
 
-    pub fn transform_ray_data_with_error(&self, _: RayData, _: Vector3f, _: Vector3f) -> (RayData, Vector3f, Vector3f) {
-        unimplemented!()
+    pub fn transform_ray_data_with_error(&self, ray: RayData) -> (RayData, Vector3f, Vector3f) {
+        let (origin, o_err) = self.transform_point_with_error(ray.origin);
+        let (direction, d_err) = self.transform_vector_with_error(ray.direction);
+
+        (RayData {
+            origin,
+            direction,
+        },
+        o_err,
+        d_err)
     }
 
     pub fn transform_ray(&self, mut ray: Ray) -> Ray {
-        ray.ray = self.transform_ray_data(ray.ray);
+        let (origin, o_err) = self.transform_point_with_error(ray.origin);
+        let direction = self.transform_vector(ray.direction);
+
+        ray.origin = origin;
+        ray.direction = direction;
+
+        let length_squared = ray.direction.length_squared();
+        let max = ray.max.unwrap_or(Float::infinity());
+
+        if length_squared > 0.0 {
+            let dir = ray.direction;
+            let dt = dir.abs().dot(o_err) / length_squared;
+            ray.origin += dir * dt;
+            ray.max = Some(max - dt);
+        }
+
         ray
     }
 
-    pub fn transform_ray_with_error(&self, _: Ray, _: Vector3f, _: Vector3f) -> (Ray, Vector3f, Vector3f) {
-        unimplemented!()
+    pub fn transform_ray_with_error(&self, mut ray: Ray) -> (Ray, Vector3f, Vector3f) {
+        let (origin, o_err) = self.transform_point_with_error(ray.origin);
+        let (direction, d_err) = self.transform_vector_with_error(ray.direction);
+
+        ray.origin = origin;
+        ray.direction = direction;
+
+        (ray, o_err, d_err)
     }
 
     pub fn transform_ray_differential(&self, mut ray: RayDifferential) -> RayDifferential {
@@ -126,7 +207,7 @@ impl Transform {
         ret
     }
 
-    pub fn transform_surface_interaction(&self, si: &SurfaceInteraction) -> SurfaceInteraction {
+    pub fn transform_surface_interaction<'a>(&self, si: &SurfaceInteraction<'a>) -> SurfaceInteraction<'a> {
         let mut ret = si.clone();
 
         let (p, p_err) = self.transform_point_with_abs_error(ret.p, ret.p_err);
@@ -152,41 +233,6 @@ impl Transform {
         }
 
         ret
-    }
-
-    pub fn transform_point_inverse(&self, point: Point3f) -> Point3f {
-        self.inverse.transform_point(point)
-    }
-
-    pub fn transform_vector_inverse(&self, vector: Vector3f) -> Vector3f {
-        self.inverse.transform_vector(vector)
-    }
-
-    pub fn transform_normal_inverse(&self, normal: Normal) -> Normal {
-        let transpose = self.matrix.transpose();
-        transpose.transform_vector(*normal).into()
-    }
-
-    pub fn transform_ray_data_inverse(&self, ray: RayData) -> RayData {
-        let origin = self.transform_point_inverse(ray.origin);
-        let direction = self.transform_vector_inverse(ray.direction);
-        // Offset ray origin to the edge of error bounds and compute tMax
-        RayData {
-            origin,
-            direction,
-        }
-    }
-
-    pub fn transform_ray_inverse(&self, mut ray: Ray) -> Ray {
-        ray.ray = self.transform_ray_data_inverse(ray.ray);
-        ray
-    }
-
-    pub fn transform_ray_differential_inverse(&self, mut ray: RayDifferential) -> RayDifferential {
-        ray.ray = self.transform_ray(ray.ray);
-        ray.x = ray.x.map(|x| self.transform_ray_data_inverse(x));
-        ray.y = ray.y.map(|y| self.transform_ray_data_inverse(y));
-        ray
     }
 }
 
