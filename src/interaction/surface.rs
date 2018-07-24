@@ -4,6 +4,7 @@ use prelude::*;
 use math::*;
 
 use bsdf::Bsdf;
+use primitive::Primitive;
 use shape::Shape;
 
 #[derive(Copy, Clone, Debug)]
@@ -72,9 +73,11 @@ pub struct SurfaceInteraction<'a> {
     pub dndu: Normal,
     pub dndv: Normal,
     pub shape: Option<&'a Shape>,
+    pub primitive: Option<&'a Primitive>,
     pub shading: Shading,
-    pub wo: Ray,
-    pub bsdf: Arc<Bsdf>,
+    pub wo: Vector3f,
+    pub bsdf: Option<Arc<Bsdf>>,
+    pub bssrdf: Option<Arc<()>>,
 }
 
 impl<'a> SurfaceInteraction<'a> {
@@ -88,7 +91,8 @@ impl<'a> SurfaceInteraction<'a> {
         dndu: Normal,
         dndv: Normal,
         time: Float,
-        shape: Option<&'a Shape>
+        shape: Option<&'a Shape>,
+        primitive: Option<&'a Primitive>,
     ) -> Self {
         let mut n: Normal = dpdu.cross(dpdv).normalize().into();
 
@@ -108,8 +112,6 @@ impl<'a> SurfaceInteraction<'a> {
             dndv,
         };
 
-        unimplemented!();
-/*
         Self {
             interaction,
             uv,
@@ -118,8 +120,12 @@ impl<'a> SurfaceInteraction<'a> {
             dndu,
             dndv,
             shape,
+            primitive,
+            wo,
             shading,
-        }*/
+            bsdf: None,
+            bssrdf: None,
+        }
     }
 
     pub fn set_shading_geometry(&mut self, dpdus: Vector3f, dpdvs: Vector3f, dndus: Normal, dndvs: Normal, orientation_is_authoritative: bool) {
@@ -148,14 +154,14 @@ impl<'a> SurfaceInteraction<'a> {
         unimplemented!()
     }
 
-    pub fn le(&self, ray: &Ray) -> Spectrum {
-        Spectrum::new(0.0)
+    pub fn le(&self, ray: &Vector3f) -> Spectrum {
+        unimplemented!()
     }
 }
 
 #[derive(Copy, Clone, Debug)]
 pub struct Sample {
     pub li: Spectrum,
-    pub wi: Ray,
+    pub wi: Vector3f,
     pub pdf: Float,
 }

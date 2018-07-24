@@ -15,7 +15,7 @@ bitflags! {
 }
 
 pub trait Bsdf: Debug {
-    fn f(&self, wo: Ray, wi: Ray) -> Spectrum;
+    fn f(&self, wo: Vector3f, wi: Vector3f) -> Spectrum;
 
-    fn sample_f(&self, wo: Ray, u: Point2f, BxdfType) -> Sample;
+    fn sample_f(&self, wo: Vector3f, u: Point2f, BxdfType) -> Sample;
 }

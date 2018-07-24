@@ -14,7 +14,7 @@ pub struct Scene {
 impl Scene {
     pub fn new(aggregate: Arc<Primitive>, mut lights: Vec<Box<Light>>) -> Self {
         let mut scene = Self {
-            world_bound: *aggregate.world_bound(),
+            world_bound: aggregate.world_bound(),
             lights: Arc::new(vec![]),
             aggregate,
         };
@@ -32,7 +32,7 @@ impl Scene {
         &self.world_bound
     }
 
-    pub fn intersect(&self, ray: &Ray) -> Option<SurfaceInteraction> {
+    pub fn intersect(&self, ray: &mut Ray) -> Option<SurfaceInteraction> {
         self.aggregate.intersect(ray)
     }
 

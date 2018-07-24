@@ -53,12 +53,9 @@ impl Shape for Sphere {
         )
     }
 
-    fn intersect<'a>(&'a self, ray: &Ray, test_alpha_texture: bool) -> Option<(Float, SurfaceInteraction<'a>)> {
+    fn intersect<'a>(&'a self, ray: &Ray, _: bool) -> Option<(Float, SurfaceInteraction<'a>)> {
         let phi = float(0.0);
-        let p_hit = Point3f::new(float(0.0), float(0.0), float(0.0));
 
-        let o_err = Vector3f::zero();
-        let d_err = Vector3f::zero();
         let (ray, o_err, d_err) = self.shape_data.world_to_object.transform_ray_with_error(*ray);
 
         let dx = efloat(ray.direction.x, d_err.x);
@@ -182,6 +179,7 @@ impl Shape for Sphere {
             dndv,
             ray.time,
             Some(self),
+            None,
         );
         let interaction = self.shape_data.object_to_world.transform_surface_interaction(&interaction);
 

@@ -1,8 +1,10 @@
 use std::cmp;
 use std::sync::Arc;
+use cg::prelude::*;
 use cg::Vector3;
 use num_cpus;
 use rayon::prelude::*;
+use prelude::*;
 
 use ::{
     camera::Camera,
@@ -41,10 +43,10 @@ impl SamplerIntegrator for WhittedIntegrator {
         &mut self.sampler
     }
 
-    fn li(&mut self, ray: RayDifferential, scene: &Scene, sampler: &mut Box<Sampler>, arena: &(), depth: i32) -> Spectrum {
+    fn li(&mut self, mut ray: RayDifferential, scene: &Scene, sampler: &mut Box<Sampler>, arena: &(), depth: i32) -> Spectrum {
         let mut l = Spectrum::new(0.0);
 
-        if let Some(isect) = scene.intersect(&ray) {
+        if let Some(isect) = scene.intersect(&mut ray) {
             // initialise common variables for Whitted
             let n = isect.shading.n;
             let wo = isect.wo;
@@ -57,13 +59,22 @@ impl SamplerIntegrator for WhittedIntegrator {
 
             // add contribution of each light source
             for light in scene.lights.iter() {
-                let (sample, _) = light.sample_li(&isect, sampler.get_2d());
+                let (sample, visibility) = light.sample_li(&isect, sampler.get_2d());
 
                 if sample.li.is_black() || sample.pdf == 0.0 {
                     continue;
                 }
 
-                let f = isect.bsdf.f(wo, sample.wi);
+                let bsdf = match &isect.bsdf {
+                    Some(bsdf) => bsdf,
+                    None => continue,
+                };
+
+                let f = bsdf.f(wo, sample.wi);
+
+                if !f.is_black() && visibility.unoccluded(scene) {
+                    l += f * sample.li * sample.wi.dot(*n).abs() / sample.pdf;
+                }
             }
 
             if depth + 1 < self.max_depth {

@@ -40,6 +40,7 @@ pub trait Shape: Debug {
         self.object_to_world().transform_bounds(self.object_bounds())
     }
 
+    /// If the `Ray` intersects, returns both the distance and the `SurfaceInteraction`.
     fn intersect<'a>(&'a self, ray: &Ray, test_alpha_texture: bool) -> Option<(Float, SurfaceInteraction<'a>)>;
 
     fn intersect_p(&self, ray: &Ray, test_alpha_texture: bool) -> bool {

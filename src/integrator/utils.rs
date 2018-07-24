@@ -15,7 +15,12 @@ pub fn specular_reflect(integrator: &mut impl SamplerIntegrator, ray: &RayDiffer
 
     let ty = BxdfType::Reflection | BxdfType::Specular;
 
-    let f = isect.bsdf.sample_f(wo, sampler.get_2d(), ty);
+    let bsdf = match &isect.bsdf {
+        Some(bsdf) => bsdf,
+        None => return Spectrum::new(0.0),
+    };
+
+    let f = bsdf.sample_f(wo, sampler.get_2d(), ty);
 
     // return contribution of specular reflection
     let ns = isect.shading.n;
@@ -36,7 +41,12 @@ pub fn specular_transmit(integrator: &mut impl SamplerIntegrator, ray: &RayDiffe
 
     let ty = BxdfType::Transmission | BxdfType::Specular;
 
-    let f = isect.bsdf.sample_f(wo, sampler.get_2d(), ty);
+    let bsdf = match &isect.bsdf {
+        Some(bsdf) => bsdf,
+        None => return Spectrum::new(0.0),
+    };
+
+    let f = bsdf.sample_f(wo, sampler.get_2d(), ty);
 
     // return contribution of specular reflection
     let ns = isect.shading.n;
