@@ -30,6 +30,10 @@ pub struct RayData {
 }
 
 impl RayData {
+    pub fn new(origin: Point3f, direction: Vector3f) -> Self {
+        Self { origin, direction }
+    }
+
     pub fn position(&self, t: Float) -> Point3f {
         self.origin + self.direction * t
     }
@@ -52,6 +56,13 @@ impl Ray {
             max: None,
             time: float(0.0),
             medium: None,
+        }
+    }
+
+    pub fn to_data(&self) -> RayData {
+        RayData {
+            origin: self.origin,
+            direction: self.direction,
         }
     }
 
@@ -85,6 +96,14 @@ impl RayDifferential {
     pub fn new(origin: Point3f, direction: Vector3f) -> Self {
         Self {
             ray: Ray::new(origin, direction),
+            x: None,
+            y: None,
+        }
+    }
+
+    pub fn from_ray(ray: Ray) -> Self {
+        Self {
+            ray,
             x: None,
             y: None,
         }

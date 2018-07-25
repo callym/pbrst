@@ -26,8 +26,7 @@ pub trait SamplerIntegrator: Integrator {
         let sample_bounds = {
             let camera = self.camera();
             let film = camera.film();
-            let film = film.read().unwrap();
-            film.sample_bounds()
+            film.sample_bounds
         };
         let sample_extent = sample_bounds.diagonal();
 
@@ -61,7 +60,6 @@ pub trait SamplerIntegrator: Integrator {
                 let mut film_tile = {
                     let camera = self.camera();
                     let film = camera.film();
-                    let film = film.read().unwrap();
                     film.film_tile(&tile_bounds)
                 };
 
@@ -76,7 +74,7 @@ pub trait SamplerIntegrator: Integrator {
                             let camera_sample = tile_sampler.get_camera_sample(&pixel);
 
                             // generate camera ray for current sample
-                            let (mut ray, ray_weight) = self.camera().generate_ray_differential(&camera_sample);
+                            let (ray_weight, mut ray) = self.camera().generate_ray_differential(&camera_sample);
                             ray.scale_differentials(1.0 / (tile_sampler.samples_per_pixel() as FloatPrim).sqrt());
 
                             // evaluate radiance along camera ray
@@ -106,7 +104,6 @@ pub trait SamplerIntegrator: Integrator {
                 {
                     let camera = self.camera();
                     let film = camera.film();
-                    let mut film = film.write().unwrap();
                     film.merge_film_tile(film_tile);
                 };
             }
@@ -115,7 +112,6 @@ pub trait SamplerIntegrator: Integrator {
         {
             let camera = self.camera();
             let film = camera.film();
-            let mut film = film.write().unwrap();
             film.write_image();
         }
     }

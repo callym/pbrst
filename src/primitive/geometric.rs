@@ -9,7 +9,7 @@ pub struct GeometricPrimitive {
     pub shape: Arc<Shape>,
     pub material: Option<Arc<()>>,
     pub area_light: Option<Arc<()>>,
-    pub medium_interface: (),
+    pub medium_interface: Option<()>,
 }
 
 impl Primitive for GeometricPrimitive {

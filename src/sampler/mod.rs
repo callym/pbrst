@@ -14,6 +14,9 @@ pub trait Sampler {
     fn get_2d(&self) -> Point2f;
 }
 
+#[derive(Copy, Clone, Debug)]
 pub struct CameraSample {
-
+    pub lens: Point2f,
+    pub film: Point2f,
+    pub time: Float,
 }
