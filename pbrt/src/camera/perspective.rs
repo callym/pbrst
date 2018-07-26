@@ -18,7 +18,7 @@ pub struct PerspectiveCamera {
     lens_radius: Float,
     focal_distance: Float,
     fov: Rad<Float>,
-    film: Arc<Film>,
+    film: Arc<Mutex<Film>>,
     medium: Option<()>,
 }
 
@@ -31,13 +31,18 @@ impl PerspectiveCamera {
         lens_radius: Float,
         focal_distance: Float,
         fov: impl Into<Rad<Float>> + Copy,
-        film: Arc<Film>,
+        film: Arc<Mutex<Film>>,
         medium: Option<()>,
     ) -> Self {
+        let full_resolution = {
+            let film = film.lock().unwrap();
+            film.full_resolution
+        };
+
         let camera_to_screen = Transform::new(
             cg::perspective(
                 fov,
-                float(film.full_resolution.x as f32) / float(film.full_resolution.y as f32),
+                float(full_resolution.x as f32) / float(full_resolution.y as f32),
                 float(1e-2),
                 float(1000.0)));
 
@@ -90,7 +95,7 @@ impl PerspectiveCamera {
 }
 
 impl Camera for PerspectiveCamera {
-    fn film(&self) -> Arc<Film> {
+    fn film(&self) -> Arc<Mutex<Film>> {
         self.film.clone()
     }
 

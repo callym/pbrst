@@ -26,7 +26,8 @@ pub trait SamplerIntegrator: Integrator {
         let sample_bounds = {
             let camera = self.camera();
             let film = camera.film();
-            film.sample_bounds
+            let film = film.lock().unwrap();
+            film.sample_bounds()
         };
         let sample_extent = sample_bounds.diagonal();
 
@@ -60,6 +61,7 @@ pub trait SamplerIntegrator: Integrator {
                 let mut film_tile = {
                     let camera = self.camera();
                     let film = camera.film();
+                    let film = film.lock().unwrap();
                     film.film_tile(&tile_bounds)
                 };
 
@@ -75,7 +77,7 @@ pub trait SamplerIntegrator: Integrator {
 
                             // generate camera ray for current sample
                             let (ray_weight, mut ray) = self.camera().generate_ray_differential(&camera_sample);
-                            ray.scale_differentials(1.0 / (tile_sampler.samples_per_pixel() as FloatPrim).sqrt());
+                            ray.scale_differentials(float(1.0 / (tile_sampler.samples_per_pixel() as FloatPrim).sqrt()));
 
                             // evaluate radiance along camera ray
                             let mut l = Spectrum::new(0.0);
@@ -92,7 +94,7 @@ pub trait SamplerIntegrator: Integrator {
                             }
 
                             // add camera ray's contribution to image
-                            film_tile.add_sample((), l, ray_weight);
+                            film_tile.add_sample(camera_sample.film, l, ray_weight);
 
                             // free MemoryArena memory from computing image sample value
                             // arena.reset();
@@ -104,6 +106,7 @@ pub trait SamplerIntegrator: Integrator {
                 {
                     let camera = self.camera();
                     let film = camera.film();
+                    let mut film = film.lock().unwrap();
                     film.merge_film_tile(film_tile);
                 };
             }
@@ -112,7 +115,8 @@ pub trait SamplerIntegrator: Integrator {
         {
             let camera = self.camera();
             let film = camera.film();
-            film.write_image();
+            let film = film.lock().unwrap();
+            film.write_image(float(1.0));
         }
     }
 }

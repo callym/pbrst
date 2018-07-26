@@ -2,6 +2,7 @@ use std::cmp::max;
 use prelude::*;
 use super::Filter;
 
+#[derive(Clone, Debug)]
 pub struct BoxFilter {
     radius: Vector2f,
     radius_inv: Vector2f,
@@ -33,6 +34,7 @@ impl Filter for BoxFilter {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct TriangleFilter {
     radius: Vector2f,
     radius_inv: Vector2f,

@@ -123,12 +123,12 @@ fn jitter_value(jitter: bool, rng: &mut impl Rng) -> Float {
 }
 
 fn stratified_sample_1d(samples: u32, jitter: bool, rng: &mut impl Rng) -> Vec<Float> {
-    let inv_n = float(1.0) / float(samples as FloatPrim);
+    let inv_n = float(1.0) / float(samples);
 
     let mut vec = Vec::with_capacity(samples as usize);
 
     for i in 0..samples {
-        let i = float(i as FloatPrim);
+        let i = float(i);
         let delta = jitter_value(jitter, rng);
         vec.push(min((i + delta) * inv_n, float(ONE_MINUS_EPSILON)));
     }
@@ -137,15 +137,15 @@ fn stratified_sample_1d(samples: u32, jitter: bool, rng: &mut impl Rng) -> Vec<F
 }
 
 fn stratified_sample_2d(x_samples: u32, y_samples: u32, jitter: bool, rng: &mut impl Rng) -> Vec<Point2f> {
-    let inv_x = float(1.0) / float(x_samples as FloatPrim);
-    let inv_y = float(1.0) / float(y_samples as FloatPrim);
+    let inv_x = float(1.0) / float(x_samples);
+    let inv_y = float(1.0) / float(y_samples);
 
     let mut vec = Vec::with_capacity(x_samples as usize * y_samples as usize);
 
     for y in 0..y_samples {
         for x in 0..x_samples {
-            let x = float(x as FloatPrim);
-            let y = float(y as FloatPrim);
+            let x = float(x);
+            let y = float(y);
 
             let jx = jitter_value(jitter, rng);
             let jy = jitter_value(jitter, rng);
@@ -172,13 +172,13 @@ fn shuffle<T>(vec: &mut Vec<T>, dimensions: usize, rng: &mut impl Rng) {
 }
 
 fn latin_hypercube(n: usize, dimensions: usize, rng: &mut impl Rng) -> Vec<Float> {
-    let inv_n = float(1.0) / float(n as FloatPrim);
+    let inv_n = float(1.0) / float(n);
 
     let mut vec = Vec::with_capacity(n * dimensions);
 
     for i in 0..n {
         for j in 0..dimensions {
-            let sj = (float(i as FloatPrim) + rng.gen()) * inv_n;
+            let sj = (float(i) + rng.gen()) * inv_n;
             vec[dimensions * i + j] = min(sj, float(ONE_MINUS_EPSILON));
         }
     }

@@ -16,7 +16,7 @@ pub struct OrthographicCamera {
     shutter_close: Float,
     lens_radius: Float,
     focal_distance: Float,
-    film: Arc<Film>,
+    film: Arc<Mutex<Film>>,
     medium: Option<()>,
 }
 
@@ -28,7 +28,7 @@ impl OrthographicCamera {
         shutter_close: Float,
         lens_radius: Float,
         focal_distance: Float,
-        film: Arc<Film>,
+        film: Arc<Mutex<Film>>,
         medium: Option<()>,
     ) -> Self {
         let camera_to_screen = Transform::identity();
@@ -76,7 +76,7 @@ impl OrthographicCamera {
 }
 
 impl Camera for OrthographicCamera {
-    fn film(&self) -> Arc<Film> {
+    fn film(&self) -> Arc<Mutex<Film>> {
         self.film.clone()
     }
 

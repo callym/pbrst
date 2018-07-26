@@ -13,7 +13,7 @@ pub struct Bounds2<T: BaseNum> {
     pub max: Point2<T>,
 }
 
-impl<T: BaseNum> Bounds2<T> {
+impl<T: BaseNum + Ord> Bounds2<T> {
     pub fn empty() -> Self where T: Bounded {
         let min = T::min_value();
         let max = T::max_value();
@@ -24,7 +24,7 @@ impl<T: BaseNum> Bounds2<T> {
         }
     }
 
-    pub fn new(p1: Point2<T>, p2: Point2<T>) -> Self where T: Ord {
+    pub fn new(p1: Point2<T>, p2: Point2<T>) -> Self {
         let min = Point2 {
             x: min(p1.x, p2.x),
             y: min(p1.y, p2.y),
@@ -41,6 +41,12 @@ impl<T: BaseNum> Bounds2<T> {
         }
     }
 
+    pub fn map<U: BaseNum + Ord>(self, fun: fn(T) -> U) -> Bounds2<U> {
+        let min = self.min.map(fun);
+        let max = self.max.map(fun);
+        Bounds2::new(min, max)
+    }
+
     pub fn from_point(p: Point2<T>) -> Self {
         Self {
             min: p,
@@ -55,6 +61,18 @@ impl<T: BaseNum> Bounds2<T> {
     pub fn area(&self) -> T {
         let d = self.diagonal();
         d.x * d.y
+    }
+
+    pub fn intersect(&self, b: Bounds2<T>) -> Self {
+        Self {
+            min: Point2::new(max(self.min.x, b.min.x), max(self.min.y, b.min.y)),
+            max: Point2::new(min(self.min.x, b.max.x), min(self.min.y, b.max.y)),
+        }
+    }
+
+    pub fn inside_exclusive(&self, p: Point2<T>) -> bool {
+        p.x >= self.min.x && p.x < self.max.x &&
+        p.y >= self.min.y && p.y < self.max.y
     }
 }
 
@@ -92,6 +110,12 @@ impl<T: BaseNum + Ord + Bounded> Bounds3<T> {
             min,
             max,
         }
+    }
+
+    pub fn map<U: BaseNum + Bounded + Ord>(self, fun: fn(T) -> U) -> Bounds3<U> {
+        let min = self.min.map(fun);
+        let max = self.max.map(fun);
+        Bounds3::new(min, max)
     }
 
     pub fn from_point(p: Point3<T>) -> Self {

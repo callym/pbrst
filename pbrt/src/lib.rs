@@ -8,10 +8,13 @@
     use_extern_macros,
 )]
 
+extern crate atomic;
 #[macro_use] extern crate bitflags;
 extern crate cgmath as cg;
 #[macro_use] extern crate derive_more;
+#[macro_use] extern crate derivative;
 #[macro_use] extern crate hexf;
+extern crate image;
 #[macro_use] extern crate itertools;
 #[macro_use] extern crate lazy_static;
 extern crate noisy_float;
@@ -26,6 +29,7 @@ extern crate pbrt_proc;
 
 pub mod bsdf;
 pub mod camera;
+pub mod film;
 pub mod filter;
 pub mod interaction;
 pub mod integrator;

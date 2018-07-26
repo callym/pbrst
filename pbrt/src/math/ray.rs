@@ -113,9 +113,7 @@ impl RayDifferential {
         self.x.is_some() && self.y.is_some()
     }
 
-    pub fn scale_differentials(&mut self, scale: impl Into<Float>) {
-        let scale: Float = scale.into();
-
+    pub fn scale_differentials(&mut self, scale: Float) {
         let o = self.origin;
         let d = self.direction;
 

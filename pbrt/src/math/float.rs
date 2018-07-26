@@ -5,10 +5,9 @@ use std::{
     ops::{ Mul, Div, Rem, Neg, MulAssign, DivAssign, RemAssign },
 };
 use cg::ApproxEq;
-use noisy_float::types::{ R32, r32 };
 use num;
 use num::Float as NumFloat;
-use num::traits::{ Bounded, Num, One, Zero };
+use num::traits::{ Bounded, Num, One, Zero, NumCast };
 use num::traits::ParseFloatError;
 use rand::Rng;
 use rand::distributions::{ Distribution, Standard };
@@ -44,8 +43,8 @@ float_define!(f64, N64, n64);
 
 pub use self::float::*;
 
-pub fn float(f: FloatPrim) -> Float {
-    Float(CONV(f))
+pub fn float(f: impl NumCast) -> Float {
+    Float(CONV(num::cast::cast(f).unwrap()))
 }
 
 #[derive(
@@ -75,7 +74,7 @@ impl Float {
 
 impl Distribution<Float> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Float {
-        float(rng.gen())
+        float(rng.gen::<FloatPrim>())
     }
 }
 

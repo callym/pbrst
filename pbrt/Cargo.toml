@@ -4,11 +4,14 @@ version = "0.1.0"
 authors = ["Callym <callym.cooke@gmail.com>"]
 
 [dependencies]
+atomic = { version = "0.4", features = ["nightly"] }
 bitflags = "1.0"
 cgmath = { version = "0.16", features = ["simd", "swizzle"] }
 crossbeam = "0.3"
 derive_more = "0.11"
+derivative = "1.0"
 hexf = "0.1"
+image = "0.19"
 itertools = "0.7"
 lazy_static = { version = "1.0", features = ["nightly"] }
 noisy_float = "0.1"

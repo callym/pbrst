@@ -103,8 +103,8 @@ impl Spectrum for SampledSpectrum {
             yy += *y * *c;
         }
 
-        let scale = float((LAMBDA_END - LAMBDA_START) as FloatPrim) /
-            float((CIE_Y_INTEGRAL * NUM_SAMPLES as f32) as FloatPrim);
+        let scale = float(LAMBDA_END - LAMBDA_START) /
+            float(CIE_Y_INTEGRAL * NUM_SAMPLES as f32);
 
         yy * scale
     }
@@ -120,8 +120,8 @@ impl Spectrum for SampledSpectrum {
             xyz[2] += *z * *c;
         }
 
-        let scale = float((LAMBDA_END - LAMBDA_START) as FloatPrim) /
-            float((CIE_Y_INTEGRAL * NUM_SAMPLES as f32) as FloatPrim);
+        let scale = float(LAMBDA_END - LAMBDA_START) /
+            float(CIE_Y_INTEGRAL * NUM_SAMPLES as f32);
 
         xyz[0] *= scale;
         xyz[1] *= scale;
