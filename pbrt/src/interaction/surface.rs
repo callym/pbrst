@@ -3,7 +3,7 @@ use cg::prelude::*;
 use prelude::*;
 use math::*;
 
-use bsdf::Bsdf;
+use bxdf::{ Bsdf, BxdfType };
 use primitive::Primitive;
 use shape::Shape;
 
@@ -164,4 +164,5 @@ pub struct Sample {
     pub li: Spectrum,
     pub wi: Vector3f,
     pub pdf: Float,
+    pub ty: BxdfType,
 }

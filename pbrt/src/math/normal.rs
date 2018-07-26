@@ -7,6 +7,10 @@ use prelude::*;
 pub struct Normal(Vector3f);
 
 impl Normal {
+    pub fn new(x: impl Into<Float>, y: impl Into<Float>, z: impl Into<Float>) -> Self {
+        Normal(Vector3f::new(x.into(), y.into(), z.into()))
+    }
+
     pub fn zero() -> Self {
         Normal(Vector3f::zero())
     }

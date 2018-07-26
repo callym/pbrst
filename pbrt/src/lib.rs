@@ -27,7 +27,7 @@ extern crate xoshiro;
 
 extern crate pbrt_proc;
 
-pub mod bsdf;
+pub mod bxdf;
 pub mod camera;
 pub mod film;
 pub mod filter;

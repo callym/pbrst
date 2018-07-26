@@ -55,7 +55,7 @@ pub struct Film {
     pub cropped_pixel_bounds: Bounds2i,
     crop_window: Bounds2f,
     #[derivative(Debug = "ignore")]
-    pub filter: Arc<Filter>,
+    pub filter: Box<Filter>,
     pub diagonal: Float,
     scale: Float,
     pub filename: String,
@@ -69,7 +69,7 @@ impl Film {
         sample_bounds: Bounds2<i32>,
         full_resolution: Point2i,
         crop_window: Bounds2f,
-        filter: Arc<Filter>,
+        filter: Box<Filter>,
         diagonal: Float,
         scale: Float,
         filename: String,

@@ -2,7 +2,7 @@ use std::sync::Arc;
 use cg;
 
 use prelude::*;
-use bsdf::BxdfType;
+use bxdf::BxdfType;
 use math::*;
 use sampler::Sampler;
 use scene::Scene;
@@ -20,12 +20,15 @@ pub fn specular_reflect(integrator: &mut impl SamplerIntegrator, ray: &RayDiffer
         None => return Spectrum::new(0.0),
     };
 
-    let f = bsdf.sample_f(wo, sampler.get_2d(), ty);
+    let f = match bsdf.sample_f(wo, sampler.get_2d(), ty) {
+        Some(f) => f,
+        None => return Spectrum::new(0.0),
+    };
 
     // return contribution of specular reflection
     let ns = isect.shading.n;
 
-    if (f.pdf > 0.0 && !f.li.is_black() && cg::dot(f.wi.into(), *ns).abs() != 0.0) {
+    if f.pdf > 0.0 && !f.li.is_black() && cg::dot(f.wi.into(), *ns).abs() != 0.0 {
         // compute ray differential `rd` for specular reflection
         let rd = unimplemented!();
 
@@ -46,12 +49,15 @@ pub fn specular_transmit(integrator: &mut impl SamplerIntegrator, ray: &RayDiffe
         None => return Spectrum::new(0.0),
     };
 
-    let f = bsdf.sample_f(wo, sampler.get_2d(), ty);
+    let f = match bsdf.sample_f(wo, sampler.get_2d(), ty) {
+        Some(f) => f,
+        None => return Spectrum::new(0.0),
+    };
 
     // return contribution of specular reflection
     let ns = isect.shading.n;
 
-    if (f.pdf > 0.0 && !f.li.is_black() && cg::dot(f.wi.into(), *ns).abs() != 0.0) {
+    if f.pdf > 0.0 && !f.li.is_black() && cg::dot(f.wi.into(), *ns).abs() != 0.0 {
         // compute ray differential `rd` for specular reflection
         let rd = unimplemented!();
 
