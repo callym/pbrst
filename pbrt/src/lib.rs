@@ -26,6 +26,7 @@ extern crate pbrt_proc;
 
 pub mod bsdf;
 pub mod camera;
+pub mod filter;
 pub mod interaction;
 pub mod integrator;
 pub mod light;
