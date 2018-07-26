@@ -10,6 +10,8 @@ use num;
 use num::Float as NumFloat;
 use num::traits::{ Bounded, Num, One, Zero };
 use num::traits::ParseFloatError;
+use rand::Rng;
+use rand::distributions::{ Distribution, Standard };
 
 macro_rules! float_define {
     ($prim:ident, $noisy_ty:ident, $noisy_fn:ident) => {
@@ -68,6 +70,12 @@ impl Float {
 
     pub fn lerp(self, other: Self, amount: Self) -> Self {
         (float(1.0) - amount) * self + float(1.0) * other
+    }
+}
+
+impl Distribution<Float> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Float {
+        float(rng.gen())
     }
 }
 

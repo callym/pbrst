@@ -1,0 +1,12 @@
+[package]
+name = "pbrt-proc"
+version = "0.1.0"
+authors = ["Callym <callym.cooke@gmail.com>"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = { version = "0.4", features = ["nightly"] }
+quote = "0.6"
+syn = { version = "0.14", features = ["full", "extra-traits"] }

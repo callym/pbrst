@@ -4,19 +4,25 @@
     nll,
     slice_patterns,
     try_from,
-    underscore_imports
+    underscore_imports,
+    use_extern_macros,
 )]
 
 #[macro_use] extern crate bitflags;
 extern crate cgmath as cg;
 #[macro_use] extern crate derive_more;
+#[macro_use] extern crate hexf;
 #[macro_use] extern crate itertools;
 #[macro_use] extern crate lazy_static;
 extern crate noisy_float;
 extern crate num;
 extern crate num_cpus;
+extern crate rand;
 extern crate rayon;
 #[macro_use] extern crate shrinkwraprs;
+extern crate xoshiro;
+
+extern crate pbrt_proc;
 
 pub mod bsdf;
 pub mod camera;
@@ -32,6 +38,7 @@ pub mod spectrum;
 
 pub mod prelude {
     use cg;
+    pub use pbrt_proc::*;
     pub use num::Float as _;
     pub use math::*;
     use super::spectrum;

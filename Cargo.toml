@@ -1,21 +1,5 @@
-[package]
-name = "pbrt"
-version = "0.1.0"
-authors = ["Callym <callym.cooke@gmail.com>"]
-
-[dependencies]
-bitflags = "1.0"
-cgmath = { version = "0.16", features = ["simd", "swizzle"] }
-crossbeam = "0.3"
-derive_more = "0.11"
-itertools = "0.7"
-lazy_static = { version = "1.0", features = ["nightly"] }
-noisy_float = "0.1"
-num = "0.2"
-num_cpus = "1.8"
-rayon = "1.0"
-shrinkwraprs = "0.2"
-
-[features]
-default = []
-double = []
+[workspace]
+members = [
+    "pbrt",
+    "pbrt-proc",
+]
