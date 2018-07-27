@@ -21,6 +21,7 @@ extern crate image;
 extern crate noisy_float;
 extern crate num;
 extern crate num_cpus;
+extern crate physical_constants;
 extern crate rand;
 extern crate rayon;
 #[macro_use] extern crate shrinkwraprs;

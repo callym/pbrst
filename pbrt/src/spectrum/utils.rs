@@ -1,4 +1,10 @@
 use std::cmp::{ min, max };
+use physical_constants::{
+    PLANCK_CONSTANT as h,
+    SPEED_OF_LIGHT_IN_VACUUM as c,
+    BOLTZMANN_CONSTANT as kb,
+    WIEN_WAVELENGTH_DISPLACEMENT_LAW_CONSTANT as b,
+};
 
 use super::*;
 use super::sampled::*;
@@ -160,6 +166,46 @@ pub fn rgb_to_xyz(rgb: [Float; 3]) -> [Float; 3] {
     xyz[2] = 0.019334 * rgb[0] + 0.119193 * rgb[1] + 0.950227 * rgb[2];
 
     [float(xyz[0]), float(xyz[1]), float(xyz[2])]
+}
+
+pub fn blackbody(lambda: &[Float], temperature: Float) -> Vec<SampledSpectrumData> {
+    let temperature = temperature.raw() as f64;
+    lambda.iter()
+        .map(|l| {
+            let l_o = *l;
+            // convert nm to m
+            let l = l.raw() as f64 * 1e-9;
+
+            let l_5 = l.powi(5);
+            let v = (2.0 * h * c.powi(2)) /
+                (l_5 * ((h * c) / (l * kb * temperature)).exp() - 1.0);
+
+            SampledSpectrumData {
+                lambda: l_o,
+                value: float(v),
+            }
+        })
+        .collect()
+}
+
+pub fn blackbody_normalized(lambda: &[Float], temperature: Float) -> Vec<SampledSpectrumData> {
+    let temperature_r = temperature.raw() as f64;
+
+    // Wein's displacement law gives λ in m,
+    // this converts to nm for `blackbody()`
+    let lambda_max = (b / temperature_r) * 1e9;
+    let max_l = blackbody(&[float(lambda_max)], temperature);
+
+    assert!(max_l.len() == 1);
+    let max_l = max_l[0];
+
+    blackbody(lambda, temperature)
+        .into_iter()
+        .map(|mut s| {
+            s.value /= max_l.value;
+            s
+        })
+        .collect()
 }
 
 pub fn interpolate_spectrum_samples(samples: &[SampledSpectrumData], lambda: Float) -> Float {

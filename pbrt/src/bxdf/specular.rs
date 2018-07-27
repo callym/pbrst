@@ -24,7 +24,7 @@ impl Bxdf for SpecularReflection {
             pdf: float(1.0),
             wi,
             li: self.fresnel.evaluate(cos_theta(wi)) * self.r / cos_theta_abs(wi),
-            ty: self.ty(),
+            ty: Some(self.ty()),
         })
     }
 
@@ -85,7 +85,7 @@ impl Bxdf for SpecularTransmission {
             wi,
             pdf: float(1.0),
             li,
-            ty: self.ty(),
+            ty: Some(self.ty()),
         })
     }
 

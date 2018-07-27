@@ -36,6 +36,7 @@ pub(crate) use self::terms_of_motion::*;
 
 pub mod transform;
 pub use self::transform::*;
+pub use self::transform::Transform;
 
 pub mod utils;
 pub use self::utils::*;

@@ -377,6 +377,7 @@ dependencies = [
  "num 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 1.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pbrt-proc 0.1.0",
+ "physical_constants 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.5.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "rayon 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "shrinkwraprs 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -391,6 +392,11 @@ dependencies = [
  "quote 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "syn 0.14.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "physical_constants"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "png"
@@ -706,6 +712,7 @@ dependencies = [
 "checksum num-traits 0.1.43 (registry+https://github.com/rust-lang/crates.io-index)" = "92e5113e9fd4cc14ded8e499429f396a20f98c772a47cc8622a736e1ec843c31"
 "checksum num-traits 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)" = "630de1ef5cc79d0cdd78b7e33b81f083cbfe90de0f4b2b2f07f905867c70e9fe"
 "checksum num_cpus 1.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c51a3322e4bca9d212ad9a158a02abc6934d005490c054a2778df73a70aa0a30"
+"checksum physical_constants 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b8d31a9d6f22a20369d201bcba3424105f09afd38bad0d854d3fe88c145c4489"
 "checksum png 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f54b9600d584d3b8a739e1662a595fab051329eff43f20e7d8cc22872962145b"
 "checksum proc-macro-hack 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "b773f824ff2a495833f85fcdddcf85e096949971decada2e93249fa2c6c3d32f"
 "checksum proc-macro-hack-impl 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "0f674ccc446da486175527473ec8aa064f980b0966bbf767ee743a5dff6244a7"

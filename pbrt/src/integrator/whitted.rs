@@ -73,7 +73,7 @@ impl SamplerIntegrator for WhittedIntegrator {
 
                 let f = bsdf.f(wo, sample.wi, BxdfType::all());
 
-                if !f.is_black() && visibility.unoccluded(scene) {
+                if !f.is_black() && visibility.map_or(false, |v| v.unoccluded(scene)) {
                     l += f * sample.li * sample.wi.dot(*n).abs() / sample.pdf;
                 }
             }

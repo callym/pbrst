@@ -23,16 +23,18 @@ pub struct Interaction {
     pub p_err: Vector3f,
     pub wo: Vector3f,
     pub n: Option<Normal>,
+    pub medium: Option<()>,
 }
 
 impl Interaction {
-    pub fn new(p: Point3f, n: Normal, p_err: Vector3f, wo: Vector3f, time: Float) -> Self {
+    pub fn new(p: Point3f, n: Normal, p_err: Vector3f, wo: Vector3f, time: Float, medium: Option<()>) -> Self {
         Self {
             p,
             time,
             p_err,
             wo,
             n: Some(n),
+            medium,
         }
     }
 
@@ -108,7 +110,7 @@ impl<'a> SurfaceInteraction<'a> {
             *n *= float(-1.0);
         }
 
-        let interaction = Interaction::new(p, n, p_err, wo, time);
+        let interaction = Interaction::new(p, n, p_err, wo, time, None);
 
         // init shading geom from true geom
         let shading = Shading {
@@ -260,5 +262,5 @@ pub struct Sample {
     pub li: Spectrum,
     pub wi: Vector3f,
     pub pdf: Float,
-    pub ty: BxdfType,
+    pub ty: Option<BxdfType>,
 }
