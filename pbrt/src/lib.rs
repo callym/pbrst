@@ -1,4 +1,5 @@
 #![feature(
+    associated_type_defaults,
     const_fn,
     macro_at_most_once_rep,
     nll,
@@ -34,6 +35,7 @@ pub mod filter;
 pub mod interaction;
 pub mod integrator;
 pub mod light;
+pub mod material;
 pub mod math;
 pub mod primitive;
 pub mod sampler;

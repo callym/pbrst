@@ -1,8 +1,10 @@
 use std::sync::Arc;
 use prelude::*;
+use bxdf::TransportMode;
 use super::Primitive;
 use shape::Shape;
 use interaction::SurfaceInteraction;
+use material::Material;
 use math::transform::AnimatedTransform;
 
 #[derive(Clone, Debug)]
@@ -44,11 +46,12 @@ impl Primitive for TransformedPrimitive {
         panic!("TransformedPrimitive::get_area_light should never be called")
     }
 
-    fn get_material(&self) -> Option<Arc<()>> {
+    fn get_material(&self) -> Option<&Box<Material>> {
         panic!("TransformedPrimitive::get_material should never be called")
     }
 
-    fn compute_scattering_functions(&self, isect: SurfaceInteraction, arena: (), mode: (), allow_multiple_lobes: bool) {
-        panic!("TransformedPrimitive::compute_scattering_functions should never be called")
+    fn compute_scattering_functions<'a>(&'a self, _: SurfaceInteraction<'a>, _: &(), _: TransportMode, _: bool) -> SurfaceInteraction<'a> {
+        panic!("TransformedPrimitive::compute_scattering_functions should never be called");
+
     }
 }

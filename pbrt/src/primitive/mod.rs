@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 use std::sync::Arc;
 use prelude::*;
+use bxdf::{ Bsdf, TransportMode };
+use material::Material;
 use math::*;
 use interaction::SurfaceInteraction;
 
@@ -16,7 +18,7 @@ pub trait Primitive: Debug {
 
     fn get_area_light(&self) -> Option<Arc<()>>;
 
-    fn get_material(&self) -> Option<Arc<()>>;
+    fn get_material(&self) -> Option<&Box<Material>>;
 
-    fn compute_scattering_functions(&self, isect: SurfaceInteraction, arena: (), mode: (), allow_multiple_lobes: bool);
+    fn compute_scattering_functions<'a>(&'a self, isect: SurfaceInteraction<'a>, arena: &(), mode: TransportMode, allow_multiple_lobes: bool) -> SurfaceInteraction<'a>;
 }

@@ -2,7 +2,7 @@ use std::sync::Arc;
 use cg;
 
 use prelude::*;
-use bxdf::BxdfType;
+use bxdf::{ Bxdf, BxdfType };
 use math::*;
 use sampler::Sampler;
 use scene::Scene;

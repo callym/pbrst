@@ -1,13 +1,15 @@
 use std::sync::Arc;
 use prelude::*;
+use bxdf::{ Bsdf, TransportMode };
 use super::Primitive;
+use material::Material;
 use shape::Shape;
 use interaction::SurfaceInteraction;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct GeometricPrimitive {
     pub shape: Arc<Shape>,
-    pub material: Option<Arc<()>>,
+    pub material: Option<Box<Material>>,
     pub area_light: Option<Arc<()>>,
     pub medium_interface: Option<()>,
 }
@@ -38,14 +40,15 @@ impl Primitive for GeometricPrimitive {
         self.area_light.as_ref().map(|a| a.clone())
     }
 
-    fn get_material(&self) -> Option<Arc<()>> {
-        self.material.as_ref().map(|m| m.clone())
+    fn get_material(&self) -> Option<&Box<Material>> {
+        self.material.as_ref()
     }
 
-    fn compute_scattering_functions(&self, isect: SurfaceInteraction, arena: (), mode: (), allow_multiple_lobes: bool) {
+    fn compute_scattering_functions<'a>(&'a self, isect: SurfaceInteraction<'a>, arena: &(), mode: TransportMode, allow_multiple_lobes: bool) -> SurfaceInteraction<'a> {
         if let Some(material) = &self.material {
-            // todo material->ComputeScatteringFunctions()
+            material.compute_scattering_functions(isect, arena, mode, allow_multiple_lobes)
+        } else {
+            panic!("GeometricPrimitive doesn't have material")
         }
-        unimplemented!()
     }
 }

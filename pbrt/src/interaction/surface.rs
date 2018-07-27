@@ -3,7 +3,7 @@ use cg::prelude::*;
 use prelude::*;
 use math::*;
 
-use bxdf::{ Bsdf, BxdfType };
+use bxdf::{ Bsdf, BxdfType, TransportMode };
 use primitive::Primitive;
 use shape::Shape;
 
@@ -67,6 +67,7 @@ impl Interaction {
 pub struct SurfaceInteraction<'a> {
     #[shrinkwrap(main_field)]
     pub interaction: Interaction,
+    pub n: Normal,
     pub uv: Point2f,
     pub dpdu: Vector3f,
     pub dpdv: Vector3f,
@@ -76,8 +77,8 @@ pub struct SurfaceInteraction<'a> {
     pub primitive: Option<&'a Primitive>,
     pub shading: Shading,
     pub wo: Vector3f,
-    pub bsdf: Option<Arc<Bsdf>>,
-    pub bssrdf: Option<Arc<()>>,
+    pub bsdf: Option<Bsdf>,
+    pub bssrdf: Option<()>,
 }
 
 impl<'a> SurfaceInteraction<'a> {
@@ -114,6 +115,7 @@ impl<'a> SurfaceInteraction<'a> {
 
         Self {
             interaction,
+            n,
             uv,
             dpdu,
             dpdv,
@@ -150,8 +152,14 @@ impl<'a> SurfaceInteraction<'a> {
         self.shading.dndv = dndvs;
     }
 
-    pub fn compute_scattering_functions(&self, ray: &Ray, arena: &()) {
-        unimplemented!()
+    pub fn compute_scattering_functions(&mut self, ray: &Ray, arena: &(), mode: TransportMode, allow_multiple_lobes: bool) {
+        // todo - compute differentials
+        match &self.primitive {
+            Some(primitive) => {
+                *self = primitive.compute_scattering_functions(self.clone(), arena, mode, allow_multiple_lobes);
+            },
+            None => (),
+        }
     }
 
     pub fn le(&self, ray: &Vector3f) -> Spectrum {

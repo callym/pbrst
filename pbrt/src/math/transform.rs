@@ -214,7 +214,7 @@ impl Transform {
         ret.p = p;
         ret.p_err = p_err;
 
-        ret.n = ret.n.map(|n| self.transform_normal(n).normalize());
+        ret.n = self.transform_normal(ret.n).normalize();
         ret.interaction.wo = self.transform_vector(ret.interaction.wo).normalize();
 
         ret.dpdu = self.transform_vector(ret.dpdu);
@@ -228,9 +228,7 @@ impl Transform {
         ret.shading.dndu = self.transform_normal(ret.shading.dndu);
         ret.shading.dndv = self.transform_normal(ret.shading.dndv);
 
-        if let Some(n) = ret.n {
-            ret.shading.n = ret.shading.n.face_forward(n);
-        }
+        ret.shading.n = ret.shading.n.face_forward(ret.n);
 
         ret
     }

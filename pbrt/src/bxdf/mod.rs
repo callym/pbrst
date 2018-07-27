@@ -4,6 +4,9 @@ use prelude::*;
 use math::*;
 use interaction::Sample;
 
+pub mod bsdf;
+pub use self::bsdf::*;
+
 pub mod fresnel;
 pub use self::fresnel::*;
 
@@ -69,5 +72,3 @@ impl<B: Bxdf> Bxdf for ScaledBxdf<B> {
         self.scale * self.bxdf.rho(wo, n_samples, samples)
     }
 }
-
-pub trait Bsdf: Bxdf { }

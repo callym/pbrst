@@ -12,6 +12,7 @@ use ::{
     sampler::Sampler,
     scene::Scene,
 };
+use bxdf::{ BxdfType, TransportMode };
 use super::SamplerIntegrator;
 
 pub struct WhittedIntegrator {
@@ -46,13 +47,13 @@ impl SamplerIntegrator for WhittedIntegrator {
     fn li(&mut self, mut ray: RayDifferential, scene: &Scene, sampler: &mut Box<Sampler>, arena: &(), depth: i32) -> Spectrum {
         let mut l = Spectrum::new(0.0);
 
-        if let Some(isect) = scene.intersect(&mut ray) {
+        if let Some(mut isect) = scene.intersect(&mut ray) {
             // initialise common variables for Whitted
             let n = isect.shading.n;
             let wo = isect.wo;
 
             // compute scattering fn for surface interaction
-            isect.compute_scattering_functions(&ray, &arena);
+            isect.compute_scattering_functions(&ray, &arena, TransportMode::Camera, false);
 
             // compute emitted light if ray hit area light source
             l += isect.le(&wo);
@@ -70,7 +71,7 @@ impl SamplerIntegrator for WhittedIntegrator {
                     None => continue,
                 };
 
-                let f = bsdf.f(wo, sample.wi);
+                let f = bsdf.f(wo, sample.wi, BxdfType::all());
 
                 if !f.is_black() && visibility.unoccluded(scene) {
                     l += f * sample.li * sample.wi.dot(*n).abs() / sample.pdf;
