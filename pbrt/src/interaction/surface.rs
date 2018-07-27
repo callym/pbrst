@@ -69,6 +69,12 @@ pub struct SurfaceInteraction<'a> {
     pub interaction: Interaction,
     pub n: Normal,
     pub uv: Point2f,
+    pub dudx: Float,
+    pub dvdx: Float,
+    pub dudy: Float,
+    pub dvdy: Float,
+    pub dpdx: Vector3f,
+    pub dpdy: Vector3f,
     pub dpdu: Vector3f,
     pub dpdv: Vector3f,
     pub dndu: Normal,
@@ -117,6 +123,12 @@ impl<'a> SurfaceInteraction<'a> {
             interaction,
             n,
             uv,
+            dudx: float(0.0),
+            dvdx: float(0.0),
+            dudy: float(0.0),
+            dvdy: float(0.0),
+            dpdx: Vector3f::zero(),
+            dpdy: Vector3f::zero(),
             dpdu,
             dpdv,
             dndu,
@@ -159,6 +171,82 @@ impl<'a> SurfaceInteraction<'a> {
                 *self = primitive.compute_scattering_functions(self.clone(), arena, mode, allow_multiple_lobes);
             },
             None => (),
+        }
+    }
+
+    pub fn compute_differentials(&mut self, ray: &RayDifferential) {
+        if ray.has_differentials() {
+            // these are guaranteed to be Some(_) because
+            // of the ray.has_differentials() call.
+            let rx = ray.x.unwrap();
+            let ry = ray.y.unwrap();
+
+            // we assume that the surface is locally flat in respect to the sampling rate
+            // compute auxiliary intersection points with the surface plane
+            let p = self.p.into_vector();
+            let d = (*self.n).dot(p);
+
+            let tx = -((*self.n).dot(rx.origin.into_vector()) - d) / (*self.n).dot(rx.direction);
+            let px = rx.origin + rx.direction * tx;
+
+            let ty = -((*self.n).dot(ry.origin.into_vector()) - d) / (*self.n).dot(ry.direction);
+            let py = ry.origin + ry.direction * ty;
+
+            self.dpdx = (px - p).into_vector();
+            self.dpdy = (py - p).into_vector();
+
+            // compute (u, v) offsets at auxiliary points
+            // choose two dimensions to use for ray offset computation
+            let mut dim = [Dim::X; 2];
+            if self.n.x.abs() > self.n.y.abs() && self.n.x.abs() > self.n.z.abs() {
+                dim[0] = Dim::Y;
+                dim[1] = Dim::Z;
+            } else if self.n.y.abs() > self.n.z.abs() {
+                dim[0] = Dim::X;
+                dim[1] = Dim::Z;
+            } else {
+                dim[0] = Dim::X;
+                dim[1] = Dim::Y;
+            }
+
+            // init A, Bx, By matrices
+            let a = [
+                [ self.dpdu[dim[0] as usize], self.dpdv[dim[0] as usize] ],
+                [ self.dpdu[dim[1] as usize], self.dpdv[dim[1] as usize] ],
+            ];
+
+            let bx = [
+                px[dim[0] as usize] - p[dim[0] as usize],
+                px[dim[1] as usize] - p[dim[1] as usize],
+            ];
+
+            let by = [
+                py[dim[0] as usize] - p[dim[0] as usize],
+                py[dim[1] as usize] - p[dim[1] as usize],
+            ];
+
+            if let Some((dudx, dvdx)) = solve_linear_system_2x2(a, bx) {
+                self.dudx = dudx;
+                self.dvdx = dvdx;
+            } else {
+                self.dudx = float(0.0);
+                self.dvdx = float(0.0);
+            }
+
+            if let Some((dudy, dvdy)) = solve_linear_system_2x2(a, by) {
+                self.dudy = dudy;
+                self.dvdy = dvdy;
+            } else {
+                self.dudy = float(0.0);
+                self.dvdy = float(0.0);
+            }
+        } else {
+            self.dudx = float(0.0);
+            self.dvdx = float(0.0);
+            self.dudy = float(0.0);
+            self.dvdy = float(0.0);
+            self.dpdx = Vector3f::zero();
+            self.dpdy = Vector3f::zero();
         }
     }
 

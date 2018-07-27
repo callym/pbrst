@@ -1,4 +1,6 @@
 use std;
+use cg::prelude::*;
+use cg::Matrix4;
 use prelude::*;
 
 pub const SHADOW_EPSILON: f32 = 0.0001;
@@ -78,4 +80,21 @@ pub fn next_float_down(v: impl Into<f32>) -> f32 {
     }
 
     bits_to_f32(ui)
+}
+
+pub fn solve_linear_system_2x2(a: [[Float; 2]; 2], b: [Float; 2]) -> Option<(Float, Float)> {
+    let det = a[0][0] * a[1][1] - a[0][1] * a[1][0];
+    if det.abs() < 1e-10 {
+        return None;
+    }
+
+    let det = det.raw();
+    let x0 = (a[1][1] * b[0] - a[0][1] * b[1]).raw() / det;
+    let x1 = (a[0][0] * b[1] - a[1][0] * b[0]).raw() / det;
+
+    if x0.is_nan() || x1.is_nan() {
+        return None;
+    }
+
+    Some((float(x0), float(x1)))
 }

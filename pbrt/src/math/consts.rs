@@ -2,6 +2,7 @@ use std::convert::TryFrom;
 
 pub struct TryFromUsizeError(());
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Dim {
     X,
     Y,

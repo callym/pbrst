@@ -2,19 +2,19 @@ use std::sync::Arc;
 use num;
 use prelude::*;
 use super::Material;
-use super::Texture;
 use interaction::SurfaceInteraction;
 use bxdf::{ Bsdf, LambertianReflection, TransportMode };
+use texture::Texture;
 
 #[derive(Derivative)]
 #[derivative(Debug)]
 pub struct MatteMaterial {
     #[derivative(Debug = "ignore")]
-    kd: Arc<Texture<Spectrum, Output = Spectrum>>,
+    kd: Arc<Texture<Spectrum>>,
     #[derivative(Debug = "ignore")]
-    sigma: Arc<Texture<Float, Output = Float>>,
+    sigma: Arc<Texture<Float>>,
     #[derivative(Debug = "ignore")]
-    bump: Option<Arc<Texture<Float, Output = Float>>>,
+    bump: Option<Arc<Texture<Float>>>,
 }
 
 impl Material for MatteMaterial {
