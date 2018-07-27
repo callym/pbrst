@@ -1,6 +1,7 @@
 use std;
 use cg::prelude::*;
 use cg::Matrix4;
+use num;
 use prelude::*;
 
 pub const SHADOW_EPSILON: f32 = 0.0001;
@@ -97,4 +98,23 @@ pub fn solve_linear_system_2x2(a: [[Float; 2]; 2], b: [Float; 2]) -> Option<(Flo
     }
 
     Some((float(x0), float(x1)))
+}
+
+pub fn find_interval(size: usize, predicate: impl Fn(usize) -> bool) -> usize {
+    let mut first = 0;
+    let mut len = size;
+
+    while len > 0 {
+        let half = len >> 1;
+        let middle = first + half;
+
+        if predicate(middle) {
+            first = middle + 1;
+            len -= half + 1;
+        } else {
+            len = half;
+        }
+    }
+
+    num::clamp(first - 1, 0, size - 2)
 }

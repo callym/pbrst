@@ -1,9 +1,3 @@
-#[cfg(not(feature = "double"))]
-use std::f32::consts;
-
-#[cfg(feature = "double")]
-use std::f64::consts;
-
 use prelude::*;
 use super::*;
 use super::utils::*;
@@ -27,7 +21,7 @@ impl Bxdf for LambertianReflection {
     }
 
     fn f(&self, _: Vector3f, _: Vector3f) -> Spectrum {
-        self.r * float(consts::FRAC_1_PI)
+        self.r * Float::frac_1_pi()
     }
 
     fn sample_f(&self, wo: Vector3f, sample: Point2f, sampled_type: BxdfType) -> Option<Sample> {

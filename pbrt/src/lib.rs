@@ -40,6 +40,7 @@ pub mod material;
 pub mod math;
 pub mod primitive;
 pub mod sampler;
+pub mod sampling;
 pub mod scene;
 pub mod shape;
 pub mod spectrum;

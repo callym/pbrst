@@ -4,6 +4,13 @@ use std::{
     num::FpCategory,
     ops::{ Mul, Div, Rem, Neg, MulAssign, DivAssign, RemAssign },
 };
+
+#[cfg(not(feature = "double"))]
+use std::f32::consts;
+
+#[cfg(feature = "double")]
+use std::f64::consts;
+
 use cg::ApproxEq;
 use num;
 use num::Float as NumFloat;
@@ -58,6 +65,21 @@ pub struct Float(FloatNoisy);
 
 impl Float {
     float_const!(pi, PI);
+    float_const!(frac_1_pi, FRAC_1_PI);
+    float_const!(frac_pi_2, FRAC_PI_2);
+    float_const!(frac_pi_4, FRAC_PI_4);
+
+    #[inline(always)]
+    pub fn inv_2_pi() -> Self {
+        const FRAC_2_PI: FloatPrim = 1.0 / (2.0 * consts::PI);
+        float(FRAC_2_PI)
+    }
+
+    #[inline(always)]
+    pub fn inv_4_pi() -> Self {
+        const FRAC_4_PI: FloatPrim = 1.0 / (4.0 * consts::PI);
+        float(FRAC_4_PI)
+    }
 
     pub fn raw(self) -> FloatPrim {
         self.0.raw()
