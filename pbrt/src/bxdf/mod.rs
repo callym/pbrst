@@ -3,6 +3,7 @@ use cg::{ Point2, Vector3 };
 use prelude::*;
 use math::*;
 use interaction::Sample;
+use sampling::utils::*;
 
 pub mod bsdf;
 pub use self::bsdf::*;
@@ -17,6 +18,7 @@ pub mod specular;
 pub use self::specular::*;
 
 pub mod utils;
+use self::utils::*;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TransportMode {
@@ -39,7 +41,30 @@ pub trait Bxdf: Debug {
 
     fn f(&self, wo: Vector3f, wi: Vector3f) -> Spectrum;
 
-    fn sample_f(&self, wo: Vector3f, sample: Point2f, sampled_type: BxdfType) -> Option<Sample>;
+    fn sample_f(&self, wo: Vector3f, u: Point2f, _: BxdfType) -> Option<Sample> {
+        let mut wi = cosine_sample_hemisphere(u);
+        if wo.z < 0.0 {
+            wi.z *= float(-1.0);
+        }
+
+        let pdf = self.pdf(wo, wi);
+        let f = self.f(wo, wi);
+
+        Some(Sample {
+            wi,
+            pdf,
+            li: f,
+            ty: Some(self.ty()),
+        })
+    }
+
+    fn pdf(&self, wo: Vector3f, wi: Vector3f) -> Float {
+        if same_hemisphere(wo, wi) {
+            cos_theta_abs(wi) * Float::frac_1_pi()
+        } else {
+            float(0.0)
+        }
+    }
 
     fn rho(&self, wo: Option<Vector3f>, n_samples: i32, samples: &[Point2f]) -> Spectrum;
 }

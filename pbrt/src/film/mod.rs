@@ -4,6 +4,7 @@ use std::sync::{ Arc, Mutex };
 use std::ops::{ Deref, DerefMut };
 use atomic::{ Atomic, Ordering };
 use image;
+use num;
 use prelude::*;
 use filter::Filter;
 use spectrum::utils::xyz_to_rgb;
@@ -244,11 +245,11 @@ impl Film {
         let path = dir.join(format!("{}.png", &self.filename));
 
         let buf: Vec<_> = rgb.iter().map(|p| {
-            let p = p.raw() * 1.0;
-            if p > 255.0 {
-                println!("{:?}", p);
-            }
-            p as u8
+            num::clamp(
+                gamma_correct(*p).raw() * 255.0 + 0.5,
+                0.0,
+                255.0
+            ) as u8
         }).collect();
         let width = self.cropped_pixel_bounds.max.y - self.cropped_pixel_bounds.min.x;
         let height = self.cropped_pixel_bounds.max.y - self.cropped_pixel_bounds.min.y;

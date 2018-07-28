@@ -102,3 +102,8 @@ pub fn refract(wi: Vector3f, n: Normal, eta: Float) -> Option<Vector3f> {
 
     Some(Vector3f::new(x * n.x, y * n.y, z * n.z))
 }
+
+#[inline(always)]
+pub fn same_hemisphere(w: Vector3f, wp: Vector3f) -> bool {
+    w.z * wp.z > 0.0
+}

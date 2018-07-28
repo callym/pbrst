@@ -19,6 +19,15 @@ pub fn gammaf(n: i32) -> Float {
 }
 
 #[inline(always)]
+pub fn gamma_correct(value: Float) -> Float {
+    if value <= 0.0031308 {
+        float(2.92) * value
+    } else {
+        float(1.055) * value.powf(float(1.0 / 2.4)) - float(0.055)
+    }
+}
+
+#[inline(always)]
 pub fn f32_to_bits(f: impl Into<f32>) -> u32 {
     let f: f32 = f.into();
     f.to_bits()
