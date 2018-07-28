@@ -53,7 +53,8 @@ impl BaseSamplerData {
 
     pub fn start_next_sample(&mut self) -> bool {
         self.reset_array_offsets();
-        self.current_pixel_sample_index + 1 < self.samples_per_pixel
+        self.current_pixel_sample_index += 1;
+        self.current_pixel_sample_index < self.samples_per_pixel
     }
 
     pub fn set_sample_number(&mut self, num: u64) -> bool {
@@ -105,7 +106,7 @@ pub struct PixelSamplerData {
 }
 
 impl PixelSamplerData {
-    pub fn new(samples_per_pixel: u64, max_dimensions: u32, seed: u64) -> Self {
+    pub fn new(samples_per_pixel: u64, max_dimensions: u32, seed: i32) -> Self {
         let mut samples_1d = Vec::with_capacity(max_dimensions as usize);
         let mut samples_2d = Vec::with_capacity(max_dimensions as usize);
 
@@ -116,7 +117,7 @@ impl PixelSamplerData {
 
         Self {
             base: BaseSamplerData::new(samples_per_pixel),
-            rng: Xoroshiro128StarStar::from_seed_u64(seed),
+            rng: Xoroshiro128StarStar::from_seed_u64(seed as u64),
             samples_1d,
             samples_2d,
             current_1d: 0,

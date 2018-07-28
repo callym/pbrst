@@ -50,7 +50,6 @@ impl Clone for Pixel {
 #[derive(Derivative)]
 #[derivative(Debug)]
 pub struct Film {
-    sample_bounds: Bounds2<i32>,
     pub full_resolution: Point2i,
     pub cropped_pixel_bounds: Bounds2i,
     crop_window: Bounds2f,
@@ -66,7 +65,6 @@ pub struct Film {
 
 impl Film {
     pub fn new(
-        sample_bounds: Bounds2<i32>,
         full_resolution: Point2i,
         crop_window: Bounds2f,
         filter: Box<Filter>,
@@ -107,7 +105,6 @@ impl Film {
         let filter_table = Arc::new(filter_table);
 
         Self {
-            sample_bounds,
             full_resolution,
             cropped_pixel_bounds,
             crop_window,
@@ -123,8 +120,8 @@ impl Film {
 
     pub fn sample_bounds(&self) -> Bounds2i {
         let bounds = Bounds2f::new(
-            (self.cropped_pixel_bounds.min.map(float) + Vector2f::new(float(0.5), float(0.5)) - self.filter.radius()).floor(),
-            (self.cropped_pixel_bounds.max.map(float) - Vector2f::new(float(0.5), float(0.5)) + self.filter.radius()).ceil(),
+            self.cropped_pixel_bounds.min.map(float) + Vector2f::new(float(0.5), float(0.5)) - self.filter.radius(),
+            self.cropped_pixel_bounds.max.map(float) - Vector2f::new(float(0.5), float(0.5)) + self.filter.radius(),
         );
 
         bounds.map(|f| f.raw() as i32)
@@ -148,7 +145,15 @@ impl Film {
         let p0 = (float_bounds.min - half_pixel - self.filter.radius()).ceil().map(|f| f.raw() as i32);
         let p1 = (float_bounds.max - half_pixel + self.filter.radius()).floor().map(|f| f.raw() as i32);
 
-        let tile_pixel_bounds = Bounds2::new(p0, p1).intersect(self.cropped_pixel_bounds);
+        let mut tile_pixel_bounds = Bounds2::new(p0, p1).intersect(self.cropped_pixel_bounds);
+
+        if tile_pixel_bounds.min.x < 0 {
+            tile_pixel_bounds.min.x = 0;
+        }
+
+        if tile_pixel_bounds.min.y < 0 {
+            tile_pixel_bounds.min.y = 0;
+        }
 
         FilmTile::new(tile_pixel_bounds, self.filter.radius(), self.filter_table.clone(), FILTER_TABLE_WIDTH)
     }
@@ -238,7 +243,13 @@ impl Film {
         let dir = env::current_dir().unwrap();
         let path = dir.join(format!("{}.png", &self.filename));
 
-        let buf: Vec<_> = rgb.iter().map(|p| p.raw() as u8).collect();
+        let buf: Vec<_> = rgb.iter().map(|p| {
+            let p = p.raw() * 1.0;
+            if p > 255.0 {
+                println!("{:?}", p);
+            }
+            p as u8
+        }).collect();
         let width = self.cropped_pixel_bounds.max.y - self.cropped_pixel_bounds.min.x;
         let height = self.cropped_pixel_bounds.max.y - self.cropped_pixel_bounds.min.y;
 
@@ -308,9 +319,9 @@ impl FilmTile {
         let p0 = (film_discrete - self.filter_radius).ceil().map(|f| f.raw() as i32);
         let p1 = (film_discrete + self.filter_radius).floor().map(|f| f.raw() as i32) + Vector2i::new(1, 1);
         let p0 = Point2i::new(max(p0.x, self.pixel_bounds.min.x), max(p0.y, self.pixel_bounds.min.y));
-        let p1 = Point2i::new(min(p0.x, self.pixel_bounds.max.x), min(p0.y, self.pixel_bounds.max.y));
+        let p1 = Point2i::new(min(p1.x, self.pixel_bounds.max.x), min(p1.y, self.pixel_bounds.max.y));
 
-        // loop over filter support & add sample to pix arrays
+        // loop over filter support & add sample to pixel arrays
         // precompute x and y filter table offsets
         let mut ifx = vec![0; (p1.x - p0.x) as usize];
         let mut ify = vec![0; (p1.y - p0.y) as usize];
@@ -322,7 +333,7 @@ impl FilmTile {
 
         for y in p0.y..p1.y {
             let fy = ((float(y) - film_discrete.y) * self.filter_radius_inv.y * float(self.filter_table_size)).abs();
-            ifx[(y - p0.y) as usize] = min(fy.floor().raw() as usize, self.filter_table_size - 1);
+            ify[(y - p0.y) as usize] = min(fy.floor().raw() as usize, self.filter_table_size - 1);
         }
 
         for y in p0.y..p1.y {

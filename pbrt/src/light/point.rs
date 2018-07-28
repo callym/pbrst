@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use cg::prelude::*;
 use prelude::*;
 use super::{ Light, LightType, VisibilityTester };
@@ -5,17 +6,17 @@ use interaction::{ Interaction, Sample };
 use math::Transform;
 
 pub struct PointLight {
-    light_to_world: Transform,
-    world_to_light: Transform,
+    light_to_world: Arc<Transform>,
+    world_to_light: Arc<Transform>,
     position: Point3f,
     spectrum: Spectrum,
 }
 
 impl PointLight {
-    pub fn new(spectrum: Spectrum, light_to_world: Transform) -> Self {
+    pub fn new(spectrum: Spectrum, light_to_world: Arc<Transform>) -> Self {
         Self {
             spectrum,
-            world_to_light: light_to_world.inverse(),
+            world_to_light: Arc::new(light_to_world.inverse()),
             light_to_world,
             position: Point3f::zero(),
         }

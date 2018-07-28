@@ -4,10 +4,11 @@ use ::{
     sampler::Sampler,
 };
 
-mod sampler_integrator;
+pub mod sampler_integrator;
 pub use self::sampler_integrator::SamplerIntegrator;
 
-mod whitted;
+pub mod whitted;
+pub use self::whitted::WhittedIntegrator;
 
 mod utils;
 

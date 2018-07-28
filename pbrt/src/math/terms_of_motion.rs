@@ -1,5 +1,6 @@
 use num;
 use cg::prelude::*;
+use cg::Quaternion;
 use prelude::*;
 use super::{ Decomposed, DerivativeTerm };
 
@@ -78,7 +79,12 @@ impl TermsOfMotion {
 
         let cos_theta = r0.dot(r1);
         let theta = num::clamp(cos_theta, float(-1.0), float(1.0)).acos();
-        let qperp = (r1 - r0 * cos_theta).normalize();
+        let qperp = if r0 == r1 {
+            Quaternion::from_sv(float(1.0), Vector3f::zero())
+        } else {
+            (r1 - r0 * cos_theta).normalize()
+        };
+
         let t0x = t0.x;
         let t0y = t0.y;
         let t0z = t0.z;

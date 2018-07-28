@@ -253,7 +253,13 @@ impl<'a> SurfaceInteraction<'a> {
     }
 
     pub fn le(&self, ray: &Vector3f) -> Spectrum {
-        unimplemented!()
+        if let Some(prim) = &self.primitive {
+            if let Some(area) = prim.get_area_light() {
+                unimplemented!()
+            }
+        }
+
+        Spectrum::new(0.0)
     }
 }
 

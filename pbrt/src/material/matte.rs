@@ -17,6 +17,12 @@ pub struct MatteMaterial {
     bump: Option<Arc<Texture<Float>>>,
 }
 
+impl MatteMaterial {
+    pub fn new(kd: Arc<Texture<Spectrum>>, sigma: Arc<Texture<Float>>, bump: Option<Arc<Texture<Float>>>) -> Self {
+        Self { kd, sigma, bump }
+    }
+}
+
 impl Material for MatteMaterial {
     fn compute_scattering_functions<'a>(&self, isect: SurfaceInteraction<'a>, arena: &(), mode: TransportMode, allow_multiple_lobes: bool) -> SurfaceInteraction<'a> {
         let isect = match &self.bump {

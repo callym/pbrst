@@ -14,8 +14,8 @@ pub struct StratifiedSampler {
 }
 
 impl StratifiedSampler {
-    pub fn new(x_samples: u32, y_samples: u32, jitter: bool, dimensions: u32, seed: u64) -> Self {
-        let samples = x_samples as u64 * y_samples as u64 * dimensions as u64;
+    pub fn new(x_samples: u32, y_samples: u32, jitter: bool, dimensions: u32, seed: i32) -> Self {
+        let samples = x_samples as u64 * y_samples as u64;
         let pixel = PixelSamplerData::new(samples, dimensions, seed);
 
         Self {
@@ -30,11 +30,18 @@ impl StratifiedSampler {
 
 impl Sampler for StratifiedSampler {
     fn create_new(&self, seed: i32) -> Box<Sampler> {
-        unimplemented!()
+        let sampler = Self::new(
+            self.x_samples,
+            self.y_samples,
+            self.jitter,
+            self.dimensions,
+            seed,
+        );
+        Box::new(sampler)
     }
 
     fn samples_per_pixel(&self) -> u64 {
-        unimplemented!()
+        self.pixel.samples_per_pixel()
     }
 
     fn start_pixel(&mut self, pixel: &Point2i) {
@@ -44,7 +51,7 @@ impl Sampler for StratifiedSampler {
         let samples_1d = self.pixel.samples_1d();
         for i in 0..samples_1d.len() {
             let mut sample = stratified_sample_1d(self.x_samples * self.y_samples, self.jitter, self.pixel.get_rng());
-            shuffle(&mut sample, self.dimensions as usize, self.pixel.get_rng());
+            shuffle(&mut sample, 1, self.pixel.get_rng());
             let pixel = self.pixel.samples_1d_mut();
             pixel[i] = sample;
         }
@@ -52,7 +59,7 @@ impl Sampler for StratifiedSampler {
         let samples_2d = self.pixel.samples_2d();
         for i in 0..samples_2d.len() {
             let mut sample = stratified_sample_2d(self.x_samples, self.y_samples, self.jitter, self.pixel.get_rng());
-            shuffle(&mut sample, self.dimensions as usize, self.pixel.get_rng());
+            shuffle(&mut sample, 1, self.pixel.get_rng());
             let pixel = self.pixel.samples_2d_mut();
             pixel[i] = sample;
         }
@@ -62,7 +69,8 @@ impl Sampler for StratifiedSampler {
         for i in 0..samples_1d_sizes.len() {
             for j in 0..samples_per_pixel {
                 let count = self.pixel.samples_array_1d_sizes()[i];
-                let sample = stratified_sample_1d(count, self.jitter, self.pixel.get_rng());
+                let mut sample = stratified_sample_1d(count, self.jitter, self.pixel.get_rng());
+                shuffle(&mut sample, 1, self.pixel.get_rng());
                 let pixel = self.pixel.samples_array_1d_mut();
                 pixel[i] = sample;
             }
@@ -162,7 +170,7 @@ fn stratified_sample_2d(x_samples: u32, y_samples: u32, jitter: bool, rng: &mut 
 
 fn shuffle<T>(vec: &mut Vec<T>, dimensions: usize, rng: &mut impl Rng) {
     for i in 0..vec.len() {
-        let bounds = Uniform::from(0..vec.len());
+        let bounds = Uniform::from(0..vec.len() - i);
         let other = i + bounds.sample(rng);
 
         for j in 0..dimensions {

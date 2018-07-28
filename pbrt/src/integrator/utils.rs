@@ -30,7 +30,9 @@ pub fn specular_reflect(integrator: &mut impl SamplerIntegrator, ray: &RayDiffer
 
     if f.pdf > 0.0 && !f.li.is_black() && cg::dot(f.wi.into(), *ns).abs() != 0.0 {
         // compute ray differential `rd` for specular reflection
-        let rd = unimplemented!();
+        // todo - this is wrong
+        let rd = isect.spawn_ray(&f.wi);
+        let rd = RayDifferential::from_ray(rd);
 
         f.li * integrator.li(rd, scene, sampler, arena, depth + 1) * cg::dot(f.wi.into(), *ns) / f.pdf
     } else {
@@ -59,7 +61,9 @@ pub fn specular_transmit(integrator: &mut impl SamplerIntegrator, ray: &RayDiffe
 
     if f.pdf > 0.0 && !f.li.is_black() && cg::dot(f.wi.into(), *ns).abs() != 0.0 {
         // compute ray differential `rd` for specular reflection
-        let rd = unimplemented!();
+        // todo - this is wrong
+        let rd = isect.spawn_ray(&f.wi);
+        let rd = RayDifferential::from_ray(rd);
 
         f.li * integrator.li(rd, scene, sampler, arena, depth + 1) * cg::dot(f.wi.into(), *ns) / f.pdf
     } else {

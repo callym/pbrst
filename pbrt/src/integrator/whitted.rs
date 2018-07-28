@@ -22,7 +22,7 @@ pub struct WhittedIntegrator {
 }
 
 impl WhittedIntegrator {
-    fn new(max_depth: i32, camera: Arc<Camera>, sampler: Box<Sampler>, pixel_bounds: Bounds2<i32>) -> Self {
+    pub fn new(max_depth: i32, camera: Arc<Camera>, sampler: Box<Sampler>) -> Self {
         Self {
             max_depth,
             camera,

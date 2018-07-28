@@ -49,11 +49,11 @@ pub mod texture;
 pub mod prelude {
     use cg;
     pub use pbrt_proc::*;
-    pub use num::Float as _;
+    pub use num::Float as NumFloatTrait;
     pub use math::*;
     use super::spectrum;
 
-    pub use spectrum::Spectrum as _;
+    pub use spectrum::Spectrum as PbrtSpectrumTrait;
     pub type Spectrum = spectrum::RgbSpectrum;
 
     pub type Bounds2f = Bounds2<Float>;

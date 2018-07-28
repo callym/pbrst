@@ -68,7 +68,7 @@ impl VisibilityTester {
 
     #[inline(always)]
     pub fn unoccluded(&self, scene: &Scene) -> bool {
-        scene.intersect_p(&self.ray())
+        !scene.intersect_p(&self.ray())
     }
 
     pub fn tr(&self, scene: &Scene, _sampler: &Sampler) -> Spectrum {

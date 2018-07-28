@@ -38,6 +38,8 @@ pub trait SamplerIntegrator: Integrator {
 
         let num_cores = num_cpus::get();
 
+        println!("{} tiles to render", num_tiles.x * num_tiles.y);
+
         // parallel for
         for x in 0..num_tiles.x {
             for y in 0..num_tiles.y {
@@ -53,8 +55,10 @@ pub trait SamplerIntegrator: Integrator {
                 // compute sample bounds for tile
                 let x0 = sample_bounds.min.x + tile.x * TILE_SIZE;
                 let x1 = cmp::min(x0 + TILE_SIZE, sample_bounds.max.x);
+
                 let y0 = sample_bounds.min.y + tile.y * TILE_SIZE;
                 let y1 = cmp::min(y0 + TILE_SIZE, sample_bounds.max.y);
+
                 let tile_bounds = Bounds2::new(Point2::new(x0, y0), Point2::new(x1, y1));
 
                 // get FilmTile for tile
@@ -104,6 +108,7 @@ pub trait SamplerIntegrator: Integrator {
 
                 // merge image tile into Film
                 {
+                    println!("finished tile");
                     let camera = self.camera();
                     let film = camera.film();
                     let mut film = film.lock().unwrap();

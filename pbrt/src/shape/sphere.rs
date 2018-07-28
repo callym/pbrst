@@ -3,6 +3,7 @@ use std::fmt::Debug;
 use std::sync::Arc;
 
 use cg::prelude::*;
+use cg::{ Rad, Deg };
 use num;
 use prelude::*;
 use math::*;
@@ -23,12 +24,14 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new(radius: Float, z_min: Float, z_max: Float, phi_max: Float, data: ShapeData) -> Self {
+    pub fn new(radius: Float, z_min: Float, z_max: Float, phi_max: impl Into<Rad<Float>>, data: ShapeData) -> Self {
         let z_min = num::clamp(min(z_min, z_max), -radius, radius);
         let z_max = num::clamp(max(z_min, z_max), -radius, radius);
 
         let theta_min = num::clamp(z_min / radius, float(-1.0), float(1.0)).acos();
         let theta_max = num::clamp(z_max / radius, float(-1.0), float(1.0)).acos();
+
+        let phi_max: Float = num::clamp(phi_max.into(), Deg(float(0)).into(), Deg(float(360)).into()).0;
 
         Self {
             radius,

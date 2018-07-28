@@ -1,10 +1,10 @@
 use prelude::*;
 
 #[cfg(not(feature = "double"))]
-const ONE_MINUS_EPSILON: FloatPrim = hexf32!("0x1.fffffep-1");
+pub const ONE_MINUS_EPSILON: FloatPrim = hexf32!("0x1.fffffep-1");
 
 #[cfg(feature = "double")]
-const ONE_MINUS_EPSILON: FloatPrim = hexf64!("0x1.fffffffffffffp-1");
+pub const ONE_MINUS_EPSILON: FloatPrim = hexf64!("0x1.fffffffffffffp-1");
 
 mod base;
 pub use self::base::*;

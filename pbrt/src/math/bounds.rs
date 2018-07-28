@@ -66,7 +66,7 @@ impl<T: BaseNum + Ord> Bounds2<T> {
     pub fn intersect(&self, b: Bounds2<T>) -> Self {
         Self {
             min: Point2::new(max(self.min.x, b.min.x), max(self.min.y, b.min.y)),
-            max: Point2::new(min(self.min.x, b.max.x), min(self.min.y, b.max.y)),
+            max: Point2::new(min(self.max.x, b.max.x), min(self.max.y, b.max.y)),
         }
     }
 

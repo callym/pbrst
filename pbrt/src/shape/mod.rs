@@ -15,6 +15,16 @@ pub struct ShapeData {
     pub reverse_orientation: bool,
 }
 
+impl ShapeData {
+    pub fn new(object_to_world: Arc<Transform>, reverse_orientation: bool) -> Self {
+        Self {
+            world_to_object: Arc::new(object_to_world.inverse()),
+            object_to_world,
+            reverse_orientation,
+        }
+    }
+}
+
 pub trait Shape: Debug {
     fn data(&self) -> &ShapeData;
 

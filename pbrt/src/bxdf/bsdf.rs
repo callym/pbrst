@@ -1,9 +1,11 @@
+use std::cmp::min;
 use std::sync::Arc;
 use cg::prelude::*;
 use prelude::*;
 use interaction::SurfaceInteraction;
 use super::{ Bxdf, BxdfType };
 use interaction::Sample;
+use sampler::ONE_MINUS_EPSILON;
 
 #[derive(Clone, Debug)]
 pub struct Bsdf {
@@ -67,7 +69,7 @@ impl Bsdf {
 
         for bxdf in &self.bxdfs {
             let ty = bxdf.ty();
-            if ty.contains(flags) {
+            if ty.intersects(flags) {
                 if (reflect && ty.contains(BxdfType::Reflection)) ||
                   (!reflect && ty.contains(BxdfType::Transmission)) {
                     f += bxdf.f(wo, wi);
@@ -78,8 +80,8 @@ impl Bsdf {
         f
     }
 
-    pub fn sample_f(&self, wo: Vector3f, sample: Point2f, sampled_type: BxdfType) -> Option<Sample> {
-        unimplemented!()
+    pub fn sample_f(&self, wo: Vector3f, u: Point2f, sampled_type: BxdfType) -> Option<Sample> {
+        self.bxdfs[0].sample_f(wo, u, sampled_type)
     }
 
     pub fn rho(&self, wo: Option<Vector3f>, n_samples: i32, samples: &[Point2f]) -> Spectrum {

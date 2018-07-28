@@ -6,8 +6,11 @@ use material::Material;
 use math::*;
 use interaction::SurfaceInteraction;
 
-mod geometric;
-mod transformed;
+pub mod geometric;
+pub use self::geometric::GeometricPrimitive;
+
+pub mod transformed;
+pub use self::transformed::TransformedPrimitive;
 
 pub trait Primitive: Debug {
     fn intersect(&self, ray: &mut Ray) -> Option<SurfaceInteraction>;
