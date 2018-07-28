@@ -6,13 +6,13 @@ use primitive::Primitive;
 use interaction::SurfaceInteraction;
 
 pub struct Scene {
-    pub lights: Arc<Vec<Box<Light>>>,
-    aggregate: Arc<Primitive>,
+    pub lights: Arc<Vec<Box<Light + Send + Sync>>>,
+    aggregate: Arc<Primitive + Send + Sync>,
     world_bound: Bounds3<Float>,
 }
 
 impl Scene {
-    pub fn new(aggregate: Arc<Primitive>, mut lights: Vec<Box<Light>>) -> Self {
+    pub fn new(aggregate: Arc<Primitive + Send + Sync>, mut lights: Vec<Box<Light + Send + Sync>>) -> Self {
         let mut scene = Self {
             world_bound: aggregate.world_bound(),
             lights: Arc::new(vec![]),

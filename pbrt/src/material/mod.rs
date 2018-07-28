@@ -12,6 +12,6 @@ pub trait Material: Debug {
     fn compute_scattering_functions<'a>(&self, isect: SurfaceInteraction<'a>, arena: &(), mode: TransportMode, allow_multiple_lobes: bool) -> SurfaceInteraction<'a>;
 }
 
-pub fn bump<'a>(si: SurfaceInteraction<'a>, t: &Arc<Texture<Float>>) -> SurfaceInteraction<'a> {
+pub fn bump<'a>(si: SurfaceInteraction<'a>, t: &Arc<Texture<Float> + Send + Sync>) -> SurfaceInteraction<'a> {
     unimplemented!()
 }

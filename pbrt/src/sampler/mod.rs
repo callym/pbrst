@@ -13,7 +13,7 @@ mod stratified;
 pub use self::stratified::StratifiedSampler;
 
 pub trait Sampler {
-    fn create_new(&self, seed: i32) -> Box<Sampler>;
+    fn create_new(&self, seed: i32) -> Box<Sampler + Send + 'static>;
 
     fn samples_per_pixel(&self) -> u64;
 

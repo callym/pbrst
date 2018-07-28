@@ -13,38 +13,14 @@ use ::{
     scene::Scene,
 };
 use bxdf::{ BxdfType, TransportMode };
-use super::SamplerIntegrator;
+use super::{ ParIntegratorData, SamplerIntegrator };
 
-pub struct WhittedIntegrator {
+pub struct WhittedParIntegratorData {
     max_depth: i32,
-    camera: Arc<Camera>,
-    sampler: Box<Sampler>,
 }
 
-impl WhittedIntegrator {
-    pub fn new(max_depth: i32, camera: Arc<Camera>, sampler: Box<Sampler>) -> Self {
-        Self {
-            max_depth,
-            camera,
-            sampler,
-        }
-    }
-}
-
-impl SamplerIntegrator for WhittedIntegrator {
-    fn camera(&self) -> Arc<Camera> {
-        self.camera.clone()
-    }
-
-    fn sampler(&self) -> &Box<Sampler> {
-        &self.sampler
-    }
-
-    fn sampler_mut(&mut self) -> &mut Box<Sampler> {
-        &mut self.sampler
-    }
-
-    fn li(&mut self, mut ray: RayDifferential, scene: &Scene, sampler: &mut Box<Sampler>, arena: &(), depth: i32) -> Spectrum {
+impl ParIntegratorData for WhittedParIntegratorData {
+    fn li(&self, mut ray: RayDifferential, scene: &Scene, sampler: &mut Box<Sampler + Send>, arena: &(), depth: i32) -> Spectrum {
         let mut l = Spectrum::new(0.0);
 
         if let Some(mut isect) = scene.intersect(&mut ray) {
@@ -91,5 +67,43 @@ impl SamplerIntegrator for WhittedIntegrator {
         }
 
         l
+    }
+}
+
+pub struct WhittedIntegrator {
+    max_depth: i32,
+    camera: Arc<Camera + Send + Sync>,
+    sampler: Box<Sampler>,
+}
+
+impl WhittedIntegrator {
+    pub fn new(max_depth: i32, camera: Arc<Camera + Send + Sync>, sampler: Box<Sampler>) -> Self {
+        Self {
+            max_depth,
+            camera,
+            sampler,
+        }
+    }
+}
+
+impl SamplerIntegrator for WhittedIntegrator {
+    type ParIntegratorData = WhittedParIntegratorData;
+
+    fn camera(&self) -> Arc<Camera + Send + Sync> {
+        self.camera.clone()
+    }
+
+    fn sampler(&self) -> &Box<Sampler> {
+        &self.sampler
+    }
+
+    fn sampler_mut(&mut self) -> &mut Box<Sampler> {
+        &mut self.sampler
+    }
+
+    fn par_data(&self) -> Self::ParIntegratorData {
+        WhittedParIntegratorData {
+            max_depth: self.max_depth,
+        }
     }
 }

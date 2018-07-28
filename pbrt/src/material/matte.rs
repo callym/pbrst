@@ -10,15 +10,15 @@ use texture::Texture;
 #[derivative(Debug)]
 pub struct MatteMaterial {
     #[derivative(Debug = "ignore")]
-    kd: Arc<Texture<Spectrum>>,
+    kd: Arc<Texture<Spectrum> + Send + Sync>,
     #[derivative(Debug = "ignore")]
-    sigma: Arc<Texture<Float>>,
+    sigma: Arc<Texture<Float> + Send + Sync>,
     #[derivative(Debug = "ignore")]
-    bump: Option<Arc<Texture<Float>>>,
+    bump: Option<Arc<Texture<Float> + Send + Sync>>,
 }
 
 impl MatteMaterial {
-    pub fn new(kd: Arc<Texture<Spectrum>>, sigma: Arc<Texture<Float>>, bump: Option<Arc<Texture<Float>>>) -> Self {
+    pub fn new(kd: Arc<Texture<Spectrum> + Send + Sync>, sigma: Arc<Texture<Float> + Send + Sync>, bump: Option<Arc<Texture<Float> + Send + Sync>>) -> Self {
         Self { kd, sigma, bump }
     }
 }

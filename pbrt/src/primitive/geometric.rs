@@ -8,8 +8,8 @@ use interaction::SurfaceInteraction;
 
 #[derive(Debug)]
 pub struct GeometricPrimitive {
-    pub shape: Arc<Shape>,
-    pub material: Option<Box<Material>>,
+    pub shape: Arc<Shape + Send + Sync>,
+    pub material: Option<Box<Material + Send + Sync>>,
     pub area_light: Option<Arc<()>>,
     pub medium_interface: Option<()>,
 }
@@ -40,7 +40,7 @@ impl Primitive for GeometricPrimitive {
         self.area_light.as_ref().map(|a| a.clone())
     }
 
-    fn get_material(&self) -> Option<&Box<Material>> {
+    fn get_material(&self) -> Option<&Box<Material + Send + Sync>> {
         self.material.as_ref()
     }
 

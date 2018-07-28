@@ -7,9 +7,9 @@ use math::*;
 use sampler::Sampler;
 use scene::Scene;
 use interaction::SurfaceInteraction;
-use super::SamplerIntegrator;
+use super::ParIntegratorData;
 
-pub fn specular_reflect(integrator: &mut impl SamplerIntegrator, ray: &RayDifferential, isect: &SurfaceInteraction, scene: &Scene, sampler: &mut Box<Sampler>, arena: &(), depth: i32) -> Spectrum {
+pub fn specular_reflect(integrator: &impl ParIntegratorData, ray: &RayDifferential, isect: &SurfaceInteraction, scene: &Scene, sampler: &mut Box<Sampler + Send>, arena: &(), depth: i32) -> Spectrum {
     // compute specular reflection direction wi and bsdf value
     let wo = isect.wo;
 
@@ -40,7 +40,7 @@ pub fn specular_reflect(integrator: &mut impl SamplerIntegrator, ray: &RayDiffer
     }
 }
 
-pub fn specular_transmit(integrator: &mut impl SamplerIntegrator, ray: &RayDifferential, isect: &SurfaceInteraction, scene: &Scene, sampler: &mut Box<Sampler>, arena: &(), depth: i32) -> Spectrum {
+pub fn specular_transmit(integrator: &impl ParIntegratorData, ray: &RayDifferential, isect: &SurfaceInteraction, scene: &Scene, sampler: &mut Box<Sampler + Send>, arena: &(), depth: i32) -> Spectrum {
     // compute specular reflection direction wi and bsdf value
     let wo = isect.wo;
 

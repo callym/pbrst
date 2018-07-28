@@ -11,17 +11,23 @@ use sampler::Sampler;
 use scene::Scene;
 use super::Integrator;
 
+pub trait ParIntegratorData: Send {
+    fn li(&self, ray: RayDifferential, scene: &Scene, sampler: &mut Box<Sampler + Send>, arena: &(), depth: i32) -> Spectrum;
+}
+
 pub trait SamplerIntegrator: Integrator {
-    fn camera(&self) -> Arc<Camera>;
-    fn sampler(&self) -> &Box<Sampler>;
-    fn sampler_mut(&mut self) -> &mut Box<Sampler>;
+    type ParIntegratorData: ParIntegratorData;
 
-    fn li(&mut self, ray: RayDifferential, scene: &Scene, sampler: &mut Box<Sampler>, arena: &(), depth: i32) -> Spectrum;
+    fn camera(&self) -> Arc<Camera + Send + Sync>;
+    fn sampler<'a>(&'a self) -> &Box<Sampler + 'static>;
+    fn sampler_mut<'a>(&'a mut self) -> &mut Box<Sampler + 'static>;
 
-    fn render(&mut self, scene: &Scene) {
+    fn par_data(&self) -> Self::ParIntegratorData;
+
+    fn render(&mut self, scene: Arc<Scene>) {
         const TILE_SIZE: i32 = 16;
 
-        self.preprocess(scene, &mut self.sampler().create_new(0));
+        self.preprocess(&*scene, &mut self.sampler().create_new(0));
 
         let sample_bounds = {
             let camera = self.camera();
@@ -40,17 +46,25 @@ pub trait SamplerIntegrator: Integrator {
 
         println!("{} tiles to render", num_tiles.x * num_tiles.y);
 
-        // parallel for
-        for x in 0..num_tiles.x {
-            for y in 0..num_tiles.y {
+        let num_tiles = (0..num_tiles.x).into_iter()
+            .map(|x| {
+                (0..num_tiles.y).map(|y| (x, y)).collect::<Vec<_>>()
+            })
+            .flatten()
+            .map(|(x, y)| (
+                x, y,
+                scene.clone(),
+                self.sampler().create_new(y * num_tiles.x + x),
+                self.camera().clone(),
+                self.par_data(),
+            )).collect::<Vec<_>>();
+
+        num_tiles.into_par_iter()
+            .for_each(|(x, y, scene, mut tile_sampler, camera, p_self)| {
                 let tile = Point2::new(x, y);
 
                 // allocate MemoryArena for tile
                 let arena = ();
-
-                // get sampler instance for tile
-                let seed = tile.y * num_tiles.x + tile.x;
-                let mut tile_sampler = self.sampler().create_new(seed);
 
                 // compute sample bounds for tile
                 let x0 = sample_bounds.min.x + tile.x * TILE_SIZE;
@@ -63,7 +77,6 @@ pub trait SamplerIntegrator: Integrator {
 
                 // get FilmTile for tile
                 let mut film_tile = {
-                    let camera = self.camera();
                     let film = camera.film();
                     let film = film.lock().unwrap();
                     film.film_tile(&tile_bounds)
@@ -80,13 +93,13 @@ pub trait SamplerIntegrator: Integrator {
                             let camera_sample = tile_sampler.get_camera_sample(&pixel);
 
                             // generate camera ray for current sample
-                            let (ray_weight, mut ray) = self.camera().generate_ray_differential(&camera_sample);
+                            let (ray_weight, mut ray) = camera.generate_ray_differential(&camera_sample);
                             ray.scale_differentials(float(1.0 / (tile_sampler.samples_per_pixel() as FloatPrim).sqrt()));
 
                             // evaluate radiance along camera ray
                             let mut l = Spectrum::new(0.0);
                             if ray_weight > 0.0 {
-                                l = self.li(ray, scene, &mut tile_sampler, &arena, 0);
+                                l = p_self.li(ray, &*scene, &mut tile_sampler, &arena, 0);
                             }
 
                             if l.y() < -1e-5 {
@@ -109,13 +122,11 @@ pub trait SamplerIntegrator: Integrator {
                 // merge image tile into Film
                 {
                     println!("finished tile");
-                    let camera = self.camera();
                     let film = camera.film();
                     let mut film = film.lock().unwrap();
                     film.merge_film_tile(film_tile);
                 };
-            }
-        }
+            });
 
         {
             let camera = self.camera();
@@ -127,7 +138,7 @@ pub trait SamplerIntegrator: Integrator {
 }
 
 impl<T: SamplerIntegrator> Integrator for T {
-    fn render(&mut self, scene: &Scene) {
-        <Self as SamplerIntegrator>::render(self, scene);
+    fn render(&mut self, scene: Scene) {
+        <Self as SamplerIntegrator>::render(self, Arc::new(scene));
     }
 }

@@ -12,7 +12,7 @@ pub use self::geometric::GeometricPrimitive;
 pub mod transformed;
 pub use self::transformed::TransformedPrimitive;
 
-pub trait Primitive: Debug {
+pub trait Primitive: Debug + Send + Sync {
     fn intersect(&self, ray: &mut Ray) -> Option<SurfaceInteraction>;
 
     fn intersect_p(&self, ray: &Ray) -> bool;
@@ -21,7 +21,7 @@ pub trait Primitive: Debug {
 
     fn get_area_light(&self) -> Option<Arc<()>>;
 
-    fn get_material(&self) -> Option<&Box<Material>>;
+    fn get_material(&self) -> Option<&Box<Material + Send + Sync>>;
 
     fn compute_scattering_functions<'a>(&'a self, isect: SurfaceInteraction<'a>, arena: &(), mode: TransportMode, allow_multiple_lobes: bool) -> SurfaceInteraction<'a>;
 }

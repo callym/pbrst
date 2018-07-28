@@ -1,5 +1,5 @@
 use cg;
-use cg::{ Rad, Angle };
+use cg::{ Rad, Angle, Matrix4 };
 use cg::prelude::*;
 use prelude::*;
 use math::transform::Transform;
@@ -39,7 +39,14 @@ impl PerspectiveCamera {
             film.full_resolution
         };
 
+        let inv_y = Matrix4::from_nonuniform_scale(
+            float(1.0),
+            float(-1.0),
+            float(1.0)
+        );
+
         let camera_to_screen = Transform::new(
+            inv_y *
             cg::perspective(
                 fov,
                 float(full_resolution.x as f32) / float(full_resolution.y as f32),

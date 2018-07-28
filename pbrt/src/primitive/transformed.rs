@@ -9,7 +9,7 @@ use math::transform::AnimatedTransform;
 
 #[derive(Clone, Debug)]
 pub struct TransformedPrimitive {
-    pub primitive: Arc<Primitive>,
+    pub primitive: Arc<Primitive + Send + Sync>,
     pub primitive_to_world: Arc<AnimatedTransform>,
 }
 
@@ -46,7 +46,7 @@ impl Primitive for TransformedPrimitive {
         panic!("TransformedPrimitive::get_area_light should never be called")
     }
 
-    fn get_material(&self) -> Option<&Box<Material>> {
+    fn get_material(&self) -> Option<&Box<Material + Send + Sync>> {
         panic!("TransformedPrimitive::get_material should never be called")
     }
 

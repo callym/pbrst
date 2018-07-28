@@ -29,7 +29,7 @@ impl StratifiedSampler {
 }
 
 impl Sampler for StratifiedSampler {
-    fn create_new(&self, seed: i32) -> Box<Sampler> {
+    fn create_new(&self, seed: i32) -> Box<Sampler + Send + 'static> {
         let sampler = Self::new(
             self.x_samples,
             self.y_samples,
