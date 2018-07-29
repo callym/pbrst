@@ -32,7 +32,7 @@ impl Normal {
     }
 
     pub fn dot(&self, other: Self) -> Float {
-        self.0.dot(other.0).into()
+        self.0.dot(other.0)
     }
 
     pub fn cross(&self, other: Self) -> Self {

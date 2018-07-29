@@ -14,11 +14,11 @@ impl Spectrum for RgbSpectrum {
 
     fn from_sampled(samples: &[SampledSpectrumData]) -> Self {
         let samples: Vec<_> = if !is_sorted(samples) {
-            let mut samples: Vec<_> = samples.iter().map(|i| i.clone()).collect();
+            let mut samples: Vec<_> = samples.to_vec();
             samples.sort_unstable();
             samples
         } else {
-            samples.iter().map(|i| i.clone()).collect()
+            samples.to_vec()
         };
 
         let mut xyz = [float(0.0); 3];
@@ -52,6 +52,7 @@ impl Spectrum for RgbSpectrum {
         }
     }
 
+    #[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
     fn y(&self) -> Float {
         let y = [float(0.212671), float(0.715160), float(0.072169)];
         y[0] * self.c[0] + y[1] * self.c[1] + y[2] * self.c[2]

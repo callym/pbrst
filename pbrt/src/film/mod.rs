@@ -34,6 +34,12 @@ impl Pixel {
     }
 }
 
+impl Default for Pixel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Clone for Pixel {
     fn clone(&self) -> Self {
         Self {
@@ -159,10 +165,10 @@ impl Film {
         FilmTile::new(tile_pixel_bounds, self.filter.radius(), self.filter_table.clone(), FILTER_TABLE_WIDTH)
     }
 
-    pub fn merge_film_tile(&mut self, tile: FilmTile) {
+    pub fn merge_film_tile(&mut self, tile: &FilmTile) {
         let mut pixels = self.pixels.lock().unwrap();
 
-        for pixel in tile.pixel_bounds.into_iter() {
+        for pixel in &tile.pixel_bounds {
             let tile_pixel = tile.get_pixel(pixel);
             let merge_pixel = get_pixel_mut(self.cropped_pixel_bounds, &mut pixels, pixel);
             let xyz = tile_pixel.contrib_sum.to_xyz();
@@ -212,8 +218,7 @@ impl Film {
         let pixels = self.pixels.lock().unwrap();
         let mut rgb = vec![float(0.0); 3 * self.cropped_pixel_bounds.area() as usize];
 
-        let mut offset = 0;
-        for p in self.cropped_pixel_bounds.into_iter() {
+        for (offset, p) in self.cropped_pixel_bounds.into_iter().enumerate() {
             let pixel = get_pixel(self.cropped_pixel_bounds, &pixels, p);
             let rgb_vals = xyz_to_rgb(pixel.xyz);
             let offset_3 = offset * 3;
@@ -237,8 +242,6 @@ impl Film {
             rgb[offset_3] += splat_rgb[0] * splat_scale;
             rgb[offset_3 + 1] += splat_rgb[1] * splat_scale;
             rgb[offset_3 + 2] += splat_rgb[2] * splat_scale;
-
-            offset += 1;
         }
 
         let dir = env::current_dir().unwrap();
@@ -282,6 +285,12 @@ impl FilmTilePixel {
             contrib_sum: Spectrum::new(0.0),
             filter_weight_sum: float(0.0),
         }
+    }
+}
+
+impl Default for FilmTilePixel {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

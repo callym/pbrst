@@ -60,7 +60,7 @@ pub trait Spectrum: Deref<Target = [Float]> + DerefMut {
     fn to_rgb_spectrum(&self) -> RgbSpectrum;
 
     fn is_black(&self) -> bool {
-        for c in self.into_iter() {
+        for c in self.deref() {
             if *c != 0.0 {
                 return false;
             }
@@ -112,8 +112,8 @@ pub trait Spectrum: Deref<Target = [Float]> + DerefMut {
     }
 
     fn clamp(mut self, low: Option<Float>, high: Option<Float>) -> Self where Self: Sized {
-        let low = low.unwrap_or(float(0.0));
-        let high = high.unwrap_or(Float::infinity());
+        let low = low.unwrap_or_else(|| float(0.0));
+        let high = high.unwrap_or_else(Float::infinity);
 
         for c1 in self.iter_mut() {
             *c1 = num::clamp(*c1, low, high);

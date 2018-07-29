@@ -1,10 +1,11 @@
 use cg;
-use cg::{ Rad, Angle, Matrix4 };
+use cg::Rad;
 use cg::prelude::*;
 use prelude::*;
 use math::transform::Transform;
 #[macro_use] use super::*;
 
+#[allow(dead_code)]
 pub struct PerspectiveCamera {
     camera_to_world: AnimatedTransform,
     camera_to_screen: Transform,
@@ -23,6 +24,7 @@ pub struct PerspectiveCamera {
 }
 
 impl PerspectiveCamera {
+    #[cfg_attr(feature = "cargo-clippy", allow(too_many_arguments))]
     pub fn new(
         camera_to_world: AnimatedTransform,
         screen_window: Bounds2f,

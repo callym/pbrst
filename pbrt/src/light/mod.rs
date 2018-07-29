@@ -13,6 +13,7 @@ bitflags! {
     pub struct LightType: u8 {
         /// The light uses a Delta Function for its position.
         /// This means that it cannot be intersected by chance.
+        #[cfg_attr(feature = "cargo-clippy", allow(identity_op))]
         const DeltaPosition     = 1 << 0;
         const DeltaDirection    = 1 << 1;
         const Area              = 1 << 2;

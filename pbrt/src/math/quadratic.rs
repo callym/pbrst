@@ -3,9 +3,9 @@ use prelude::*;
 
 pub fn quadratic(a: Efloat, b: Efloat, c: Efloat) -> Option<(Efloat, Efloat)> {
     let discrim = {
-        let a = a.raw() as f64;
-        let b = b.raw() as f64;
-        let c = c.raw() as f64;
+        let a = f64::from(a.raw());
+        let b = f64::from(b.raw());
+        let c = f64::from(c.raw());
         b * b - 4.0 * a * c
     };
 

@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal, excessive_precision))]
+
 use std::cmp::{ min, max };
 use physical_constants::{
     PLANCK_CONSTANT as h,
@@ -169,12 +171,12 @@ pub fn rgb_to_xyz(rgb: [Float; 3]) -> [Float; 3] {
 }
 
 pub fn blackbody(lambda: &[Float], temperature: Float) -> Vec<SampledSpectrumData> {
-    let temperature = temperature.raw() as f64;
+    let temperature = f64::from(temperature.raw());
     lambda.iter()
         .map(|l| {
             let l_o = *l;
             // convert nm to m
-            let l = l.raw() as f64 * 1e-9;
+            let l = f64::from(l.raw()) * 1e-9;
 
             let l_5 = l.powi(5);
             let v = (2.0 * h * c.powi(2)) /
@@ -189,7 +191,7 @@ pub fn blackbody(lambda: &[Float], temperature: Float) -> Vec<SampledSpectrumDat
 }
 
 pub fn blackbody_normalized(lambda: &[Float], temperature: Float) -> Vec<SampledSpectrumData> {
-    let temperature_r = temperature.raw() as f64;
+    let temperature_r = f64::from(temperature.raw());
 
     // Wein's displacement law gives λ in m,
     // this converts to nm for `blackbody()`
@@ -209,7 +211,7 @@ pub fn blackbody_normalized(lambda: &[Float], temperature: Float) -> Vec<Sampled
 }
 
 pub fn interpolate_spectrum_samples(samples: &[SampledSpectrumData], lambda: Float) -> Float {
-    assert!(samples.is_empty() == false);
+    assert!(!samples.is_empty());
 
     let first = samples.first().unwrap();
     let last = samples.last().unwrap();
@@ -241,7 +243,7 @@ pub fn interpolate_spectrum_samples(samples: &[SampledSpectrumData], lambda: Flo
 }
 
 pub fn average_samples(samples: &[SampledSpectrumData], lambda_start: Float, lambda_end: Float) -> Float {
-    assert!(samples.is_empty() == false);
+    assert!(!samples.is_empty());
 
     let first = samples.first().unwrap();
     let last = samples.last().unwrap();

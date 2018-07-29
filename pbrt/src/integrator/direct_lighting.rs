@@ -1,19 +1,12 @@
-use std::cmp;
 use std::sync::Arc;
-use cg::prelude::*;
-use cg::Vector3;
-use num_cpus;
-use rayon::prelude::*;
 use prelude::*;
 use super::utils::*;
 
-use ::{
-    camera::Camera,
-    math::*,
-    sampler::Sampler,
-    scene::Scene,
-};
-use bxdf::{ BxdfType, TransportMode };
+use camera::Camera;
+use math::*;
+use sampler::Sampler;
+use scene::Scene;
+use bxdf::TransportMode;
 use super::{ ParIntegratorData, SamplerIntegrator };
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -29,7 +22,7 @@ pub struct DirectLightingParIntegratorData {
 }
 
 impl ParIntegratorData for DirectLightingParIntegratorData {
-    fn li(&self, mut ray: RayDifferential, scene: &Scene, sampler: &mut Box<Sampler + Send>, arena: &(), depth: i32) -> Spectrum {
+    fn li(&self, mut ray: RayDifferential, scene: &Scene, sampler: &mut Sampler, arena: &(), depth: i32) -> Spectrum {
         let mut l = Spectrum::new(0.0);
 
         if let Some(mut isect) = scene.intersect(&mut ray) {
@@ -39,11 +32,11 @@ impl ParIntegratorData for DirectLightingParIntegratorData {
             let wo = isect.wo;
             l += isect.le(&wo);
 
-            if scene.lights.len() > 0 {
+            if !scene.lights.is_empty() {
                 // compute direct lighting
                 l += match self.light_strategy {
                     LightStrategy::UniformSampleAll => uniform_sample_all_lights(&isect, scene, sampler, arena, &self.n_light_samples, false),
-                    LightStrategy::UniformSampleOne => uniform_sample_one_light(&isect, scene, sampler, arena, &self.n_light_samples, false),
+                    LightStrategy::UniformSampleOne => uniform_sample_one_light(&isect, scene, sampler, arena, false),
                 };
             }
 
@@ -88,15 +81,15 @@ impl SamplerIntegrator for DirectLightingIntegrator {
         self.camera.clone()
     }
 
-    fn sampler(&self) -> &Box<Sampler> {
-        &self.sampler
+    fn sampler(&self) -> &Sampler {
+        self.sampler.as_ref()
     }
 
-    fn sampler_mut(&mut self) -> &mut Box<Sampler> {
-        &mut self.sampler
+    fn sampler_mut(&mut self) -> &mut Sampler {
+        self.sampler.as_mut()
     }
 
-    fn preprocess(&mut self, scene: &Scene, sampler: &mut Box<Sampler + Send>) {
+    fn preprocess(&mut self, scene: &Scene, sampler: &mut Sampler) {
         let mut n_light_samples = vec![];
         if self.light_strategy == LightStrategy::UniformSampleAll {
             // compute number of samples to use for each light
@@ -106,9 +99,9 @@ impl SamplerIntegrator for DirectLightingIntegrator {
 
             // request samples for sampling all lights
             for _ in 0..self.max_depth {
-                for j in 0..scene.lights.len() {
-                    sampler.request_2d_vec(n_light_samples[j]);
-                    sampler.request_2d_vec(n_light_samples[j]);
+                for (_, samples) in izip!(scene.lights.iter(), n_light_samples.iter()) {
+                    sampler.request_2d_vec(*samples);
+                    sampler.request_2d_vec(*samples);
                 }
             }
         }

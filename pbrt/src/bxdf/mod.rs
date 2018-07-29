@@ -1,5 +1,4 @@
 use std::fmt::Debug;
-use cg::{ Point2, Vector3 };
 use prelude::*;
 use math::*;
 use interaction::Sample;
@@ -28,6 +27,7 @@ pub enum TransportMode {
 
 bitflags! {
     pub struct BxdfType: u8 {
+        #[cfg_attr(feature = "cargo-clippy", allow(identity_op))]
         const Reflection    = 1 << 0;
         const Transmission  = 1 << 1;
         const Diffuse       = 1 << 2;

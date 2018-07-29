@@ -1,7 +1,6 @@
-use std::cmp::{ max, min };
-use itertools::Itertools;
+use std::cmp::min;
 use rand::Rng;
-use rand::distributions::{ Distribution, Standard, Uniform };
+use rand::distributions::{ Distribution, Uniform };
 use prelude::*;
 use super::*;
 
@@ -15,7 +14,7 @@ pub struct StratifiedSampler {
 
 impl StratifiedSampler {
     pub fn new(x_samples: u32, y_samples: u32, jitter: bool, dimensions: u32, seed: i32) -> Self {
-        let samples = x_samples as u64 * y_samples as u64;
+        let samples = u64::from(x_samples) * u64::from(y_samples);
         let pixel = PixelSamplerData::new(samples, dimensions, seed);
 
         Self {
@@ -44,7 +43,7 @@ impl Sampler for StratifiedSampler {
         self.pixel.samples_per_pixel()
     }
 
-    fn start_pixel(&mut self, pixel: &Point2i) {
+    fn start_pixel(&mut self, pixel: Point2i) {
         let samples_per_pixel = self.pixel.samples_per_pixel();
 
         // generate single stratified samples for pixel
@@ -67,7 +66,7 @@ impl Sampler for StratifiedSampler {
         // generate arrays of stratified samples for pixel
         let samples_1d_sizes = self.pixel.samples_array_1d_sizes();
         for i in 0..samples_1d_sizes.len() {
-            for j in 0..samples_per_pixel {
+            for _ in 0..samples_per_pixel {
                 let count = self.pixel.samples_array_1d_sizes()[i];
                 let mut sample = stratified_sample_1d(count, self.jitter, self.pixel.get_rng());
                 shuffle(&mut sample, 1, self.pixel.get_rng());
@@ -78,7 +77,7 @@ impl Sampler for StratifiedSampler {
 
         let samples_2d_sizes = self.pixel.samples_array_2d_sizes();
         for i in 0..samples_2d_sizes.len() {
-            for j in 0..samples_per_pixel {
+            for _ in 0..samples_per_pixel {
                 let count = self.pixel.samples_array_2d_sizes()[i];
                 let sample = latin_hypercube(count as usize, 2, self.pixel.get_rng());
                 let pixel = self.pixel.samples_array_2d_mut();

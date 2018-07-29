@@ -17,9 +17,9 @@ pub trait Sampler {
 
     fn samples_per_pixel(&self) -> u64;
 
-    fn start_pixel(&mut self, pixel: &Point2i);
+    fn start_pixel(&mut self, pixel: Point2i);
 
-    fn get_camera_sample(&mut self, pixel: &Point2i) -> CameraSample {
+    fn get_camera_sample(&mut self, pixel: Point2i) -> CameraSample {
         CameraSample {
             film: pixel.map(|p| float(p as f32)) + self.get_2d().into_vector(),
             time: self.get_1d(),

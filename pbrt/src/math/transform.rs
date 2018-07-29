@@ -156,7 +156,7 @@ impl Transform {
         ray.direction = direction;
 
         let length_squared = ray.direction.length_squared();
-        let max = ray.max.unwrap_or(Float::infinity());
+        let max = ray.max.unwrap_or_else(Float::infinity);
 
         if length_squared > 0.0 {
             let dir = ray.direction;
@@ -202,9 +202,7 @@ impl Transform {
         let ret = ret.union_p(p(bounds.max.x, bounds.max.y, bounds.min.z));
         let ret = ret.union_p(p(bounds.max.x, bounds.min.y, bounds.max.z));
 
-        let ret = ret.union_p(p(bounds.max.x, bounds.max.y, bounds.max.z));
-
-        ret
+        ret.union_p(p(bounds.max.x, bounds.max.y, bounds.max.z))
     }
 
     pub fn transform_surface_interaction<'a>(&self, si: &SurfaceInteraction<'a>) -> SurfaceInteraction<'a> {
@@ -243,13 +241,13 @@ pub struct Decomposed {
 }
 
 impl Into<Decomposed> for Transform {
+    #[cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
     fn into(self) -> Decomposed {
         let m = self.matrix;
         // extract translation T
         let t = Vector3f::new(m[3][0], m[3][1], m[3][2]);
 
-        // compute M without translation
-        let m_orig = m;
+        // compute M without translations
         let mut m = m;
         for i in 0..3 {
             m[3][i] = float(0.0);
@@ -391,6 +389,7 @@ impl AnimatedTransform {
         self.start().rotate.dot(self.end().rotate) < 0.9995
     }
 
+    #[cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
     pub fn interpolate(&self, time: Float) -> Transform {
         if !self.animated() {
             return *self.start;
@@ -429,9 +428,7 @@ impl AnimatedTransform {
     }
 
     pub fn transform_point(&self, time: Float, p: Point3f) -> Point3f {
-        if !self.animated() {
-            self.start.transform_point(p)
-        } else if time <= self.start_time {
+        if !self.animated() || time <= self.start_time {
             self.start.transform_point(p)
         } else if time >= self.end_time {
             self.end.transform_point(p)
@@ -442,9 +439,7 @@ impl AnimatedTransform {
     }
 
     pub fn transform_vector(&self, time: Float, p: Vector3f) -> Vector3f {
-        if !self.animated() {
-            self.start.transform_vector(p)
-        } else if time <= self.start_time {
+        if !self.animated() || time <= self.start_time {
             self.start.transform_vector(p)
         } else if time >= self.end_time {
             self.end.transform_vector(p)
@@ -455,9 +450,7 @@ impl AnimatedTransform {
     }
 
     pub fn transform_ray_data(&self, time: Float, p: RayData) -> RayData {
-        if !self.animated() {
-            self.start.transform_ray_data(p)
-        } else if time <= self.start_time {
+        if !self.animated() || time <= self.start_time {
             self.start.transform_ray_data(p)
         } else if time >= self.end_time {
             self.end.transform_ray_data(p)
@@ -468,9 +461,7 @@ impl AnimatedTransform {
     }
 
     pub fn transform_ray(&self, time: Float, p: Ray) -> Ray {
-        if !self.animated() {
-            self.start.transform_ray(p)
-        } else if time <= self.start_time {
+        if !self.animated() || time <= self.start_time {
             self.start.transform_ray(p)
         } else if time >= self.end_time {
             self.end.transform_ray(p)
@@ -481,9 +472,7 @@ impl AnimatedTransform {
     }
 
     pub fn transform_ray_differential(&self, time: Float, p: RayDifferential) -> RayDifferential {
-        if !self.animated() {
-            self.start.transform_ray_differential(p)
-        } else if time <= self.start_time {
+        if !self.animated() || time <= self.start_time {
             self.start.transform_ray_differential(p)
         } else if time >= self.end_time {
             self.end.transform_ray_differential(p)
@@ -521,8 +510,8 @@ impl AnimatedTransform {
         for c in 0..3 {
             let (num_zero, zeros) = self.terms_of_motion.interval_find_zeros(c, p, theta, Interval::new(float(0.0), float(1.0)), 8);
 
-            for i in 0..num_zero {
-                let pz = self.transform_point(self.start_time.lerp(self.end_time, zeros[i]), p);
+            for zero in zeros.iter().take(num_zero) {
+                let pz = self.transform_point(self.start_time.lerp(self.end_time, *zero), p);
                 bounds = bounds.union_p(pz);
             }
         }

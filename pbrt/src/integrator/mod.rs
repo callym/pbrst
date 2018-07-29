@@ -1,8 +1,5 @@
-use std::sync::Arc;
-use ::{
-    scene::Scene,
-    sampler::Sampler,
-};
+use scene::Scene;
+use sampler::Sampler;
 
 pub mod sampler_integrator;
 pub use self::sampler_integrator::{ ParIntegratorData, SamplerIntegrator };
@@ -18,7 +15,7 @@ mod utils;
 pub trait Integrator {
     fn render(&mut self, scene: Scene);
 
-    fn preprocess(&mut self, _scene: &Scene, _sampler: &mut Box<Sampler + Send>) {
+    fn preprocess(&mut self, _scene: &Scene, _sampler: &mut Sampler) {
 
     }
 }

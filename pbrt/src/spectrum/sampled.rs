@@ -1,5 +1,4 @@
 use std::fmt;
-use prelude::*;
 
 use super::*;
 use super::Spectrum;
@@ -23,11 +22,11 @@ impl Spectrum for SampledSpectrum {
 
     fn from_sampled(samples: &[SampledSpectrumData]) -> Self {
         let samples: Vec<_> = if !is_sorted(samples) {
-            let mut samples: Vec<_> = samples.iter().map(|i| i.clone()).collect();
+            let mut samples: Vec<_> = samples.to_vec();
             samples.sort_unstable();
             samples
         } else {
-            samples.iter().map(|i| i.clone()).collect()
+            samples.to_vec()
         };
 
         let mut r = Self::new(0.0);

@@ -2,7 +2,6 @@ use std::sync::Arc;
 use prelude::*;
 use bxdf::TransportMode;
 use super::Primitive;
-use shape::Shape;
 use interaction::SurfaceInteraction;
 use light::Light;
 use material::Material;
@@ -47,7 +46,7 @@ impl Primitive for TransformedPrimitive {
         panic!("TransformedPrimitive::get_area_light should never be called")
     }
 
-    fn get_material(&self) -> Option<&Box<Material + Send + Sync>> {
+    fn get_material(&self) -> Option<&(Material + Send + Sync)> {
         panic!("TransformedPrimitive::get_material should never be called")
     }
 

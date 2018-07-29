@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal, excessive_precision))]
+
 pub const RGB_TO_SPECTRUM_SAMPLES: usize = 32;
 
 pub const RGB_TO_SPECTRUM_LAMBDA: [f32; RGB_TO_SPECTRUM_SAMPLES] = [

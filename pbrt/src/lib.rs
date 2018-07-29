@@ -9,6 +9,8 @@
     use_extern_macros,
 )]
 
+#![cfg_attr(feature = "cargo-clippy", warn(clippy))]
+
 extern crate atomic;
 #[macro_use] extern crate bitflags;
 extern crate cgmath as cg;

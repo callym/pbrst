@@ -1,6 +1,5 @@
 use std::{
-    self,
-    cmp::{ PartialEq, PartialOrd, Ordering, min, max },
+    cmp::{ PartialEq, PartialOrd, Ordering, max },
     num::FpCategory,
     ops::{
         Add, Sub,
@@ -50,7 +49,7 @@ pub fn efloat(v: impl Into<Float>, err: impl Into<Float>) -> Efloat {
         low,
         high,
         #[cfg(debug_assertions)]
-        v_precise: r64(v.raw() as f64),
+        v_precise: r64(f64::from(v.raw())),
     }
 }
 
@@ -63,8 +62,8 @@ impl Efloat {
             }
 
             if self.v.is_finite() {
-                debug_assert!(self.lower_bound().raw() as f64 <= self.v_precise.raw());
-                debug_assert!(self.v_precise.raw() <= self.upper_bound().raw() as f64);
+                debug_assert!(f64::from(self.lower_bound().raw()) <= self.v_precise.raw());
+                debug_assert!(self.v_precise.raw() <= f64::from(self.upper_bound().raw()));
             }
         }
     }
@@ -75,7 +74,7 @@ impl Efloat {
 
     #[cfg(debug_assertions)]
     pub fn relative_error(&self) -> Float {
-        let f = ((self.v_precise - r64(self.v.raw() as f64)) / self.v_precise).abs();
+        let f = ((self.v_precise - r64(f64::from(self.v.raw()))) / self.v_precise).abs();
         float(f.raw() as f32)
     }
 
@@ -173,7 +172,7 @@ impl Zero for Efloat {
 
     #[inline(always)]
     fn is_zero(&self) -> bool {
-        (*self).is_zero()
+        self.raw().is_zero()
     }
 }
 
@@ -281,6 +280,7 @@ impl AddAssign for Efloat {
 impl Sub for Efloat {
     type Output = Self;
     #[inline(always)]
+    #[cfg_attr(feature = "cargo-clippy", allow(suspicious_arithmetic_impl))]
     fn sub(self, rhs: Self) -> Self {
         let mut r = efloat0(self.v - rhs.v);
 

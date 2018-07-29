@@ -1,4 +1,3 @@
-use std::default::Default;
 use rand::Rng;
 use xoshiro::Xoroshiro128StarStar;
 
@@ -45,8 +44,8 @@ impl BaseSamplerData {
         self.offset_2d = 0;
     }
 
-    pub fn start_pixel(&mut self, pixel: &Point2i) {
-        self.current_pixel = *pixel;
+    pub fn start_pixel(&mut self, pixel: Point2i) {
+        self.current_pixel = pixel;
         self.current_pixel_sample_index = 0;
         self.reset_array_offsets();
     }
@@ -64,15 +63,14 @@ impl BaseSamplerData {
     }
 
     pub fn get_1d_array(&mut self, n: u32) -> Option<Vec<Float>> {
-        if self.offset_1d >= self.samples_array_1d.len() {
-            None
-        } else if self.samples_array_1d_sizes[self.offset_1d] != n {
+        if  self.offset_1d >= self.samples_array_1d.len() ||
+            self.samples_array_1d_sizes[self.offset_1d] != n {
             None
         } else {
             let o = self.offset_1d;
             self.offset_1d += 1;
 
-            let start: usize = (self.current_pixel_sample_index * n as u64) as usize;
+            let start: usize = (self.current_pixel_sample_index * u64::from(n)) as usize;
             let end = start + n as usize;
 
             Some(self.samples_array_1d[o][start..end].to_vec())
@@ -80,15 +78,14 @@ impl BaseSamplerData {
     }
 
     pub fn get_2d_array(&mut self, n: u32) -> Option<Vec<Point2f>> {
-        if self.offset_2d >= self.samples_array_2d.len() {
-            None
-        } else if self.samples_array_2d_sizes[self.offset_2d] != n {
+        if  self.offset_2d >= self.samples_array_2d.len() ||
+            self.samples_array_2d_sizes[self.offset_2d] != n {
             None
         } else {
             let o = self.offset_2d;
             self.offset_2d += 1;
 
-            let start: usize = (self.current_pixel_sample_index * n as u64) as usize;
+            let start: usize = (self.current_pixel_sample_index * u64::from(n)) as usize;
             let end = start + n as usize;
 
             Some(self.samples_array_2d[o][start..end].to_vec())
@@ -182,7 +179,7 @@ impl PixelSamplerData {
         self.current_2d = 0;
     }
 
-    pub fn start_pixel(&mut self, pixel: &Point2i) {
+    pub fn start_pixel(&mut self, pixel: Point2i) {
         self.base.start_pixel(pixel);
     }
 
@@ -249,7 +246,7 @@ pub struct GlobalSamplerData {
 }
 
 impl GlobalSamplerData {
-    pub fn start_pixel(&mut self, sampler: &mut impl GlobalSampler, pixel: &Point2i) {
+    pub fn start_pixel(&mut self, sampler: &mut impl GlobalSampler, pixel: Point2i) {
         self.base.start_pixel(pixel);
         self.dimension = 0;
         self.interval_sample_index = sampler.get_index_for_sample(0);

@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use cg::prelude::*;
 use prelude::*;
 use math::*;
@@ -7,6 +6,7 @@ use bxdf::{ Bsdf, BxdfType, TransportMode };
 use primitive::Primitive;
 use shape::Shape;
 
+#[cfg_attr(feature = "cargo-clippy", allow(large_enum_variant))]
 pub enum Interactions<'a> {
     Interaction(BaseInteraction),
     SurfaceInteraction(SurfaceInteraction<'a>),
@@ -82,7 +82,7 @@ impl BaseInteraction {
     }
 
     pub fn spawn_ray(&self, dir: &Vector3f) -> Ray {
-        let n = self.n.unwrap_or(Normal::zero());
+        let n = self.n.unwrap_or_else(Normal::zero);
         let o = offset_ray_origin(&self.p, &self.p_err, &n, dir);
 
         let mut ray = Ray::new(o, *dir);
@@ -91,7 +91,7 @@ impl BaseInteraction {
     }
 
     pub fn spawn_ray_to(&self, p: &Point3f) -> Ray {
-        let n = self.n.unwrap_or(Normal::zero());
+        let n = self.n.unwrap_or_else(Normal::zero);
         let o = offset_ray_origin(&self.p, &self.p_err, &n, &(p - self.p));
         let d = p - o;
 
@@ -129,6 +129,7 @@ pub struct SurfaceInteraction<'a> {
 }
 
 impl<'a> SurfaceInteraction<'a> {
+    #[cfg_attr(feature = "cargo-clippy", allow(too_many_arguments))]
     pub fn new(
         p: Point3f,
         p_err: Vector3f,
@@ -193,7 +194,7 @@ impl<'a> SurfaceInteraction<'a> {
         }
 
         if orientation_is_authoritative {
-            n = n.face_forward(self.shading.n);
+            self.shading.n = n.face_forward(self.shading.n);
         } else {
             self.shading.n = self.shading.n.face_forward(n);
         }
@@ -205,8 +206,9 @@ impl<'a> SurfaceInteraction<'a> {
         self.shading.dndv = dndvs;
     }
 
-    pub fn compute_scattering_functions(&mut self, ray: &Ray, arena: &(), mode: TransportMode, allow_multiple_lobes: bool) {
-        // todo - compute differentials
+    pub fn compute_scattering_functions(&mut self, ray: &RayDifferential, arena: &(), mode: TransportMode, allow_multiple_lobes: bool) {
+        self.compute_differentials(ray);
+
         match &self.primitive {
             Some(primitive) => {
                 *self = primitive.compute_scattering_functions(self.clone(), arena, mode, allow_multiple_lobes);
@@ -291,9 +293,9 @@ impl<'a> SurfaceInteraction<'a> {
         }
     }
 
-    pub fn le(&self, ray: &Vector3f) -> Spectrum {
+    pub fn le(&self, _ray: &Vector3f) -> Spectrum {
         if let Some(prim) = &self.primitive {
-            if let Some(area) = prim.get_area_light() {
+            if let Some(_area) = prim.get_area_light() {
                 unimplemented!()
             }
         }

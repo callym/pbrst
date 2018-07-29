@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use prelude::*;
 use light::Light;
 use math::*;
 use primitive::Primitive;

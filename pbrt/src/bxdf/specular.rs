@@ -28,7 +28,7 @@ impl Bxdf for SpecularReflection {
         })
     }
 
-    fn rho(&self, wo: Option<Vector3f>, n_samples: i32, samples: &[Point2f]) -> Spectrum {
+    fn rho(&self, _wo: Option<Vector3f>, _n_samples: i32, _samples: &[Point2f]) -> Spectrum {
         unimplemented!()
     }
 }
@@ -63,7 +63,7 @@ impl Bxdf for SpecularTransmission {
         Spectrum::new(0.0)
     }
 
-    fn sample_f(&self, wo: Vector3f, samples: Point2f) -> Option<Sample> {
+    fn sample_f(&self, wo: Vector3f, _samples: Point2f) -> Option<Sample> {
         // which eta is incident and which is transmitted
         let (eta_i, eta_t) = if cos_theta(wo) > 0.0 {
             (self.eta_a, self.eta_b)
@@ -89,7 +89,7 @@ impl Bxdf for SpecularTransmission {
         })
     }
 
-    fn rho(&self, wo: Option<Vector3f>, n_samples: i32, samples: &[Point2f]) -> Spectrum {
+    fn rho(&self, _wo: Option<Vector3f>, _n_samples: i32, _samples: &[Point2f]) -> Spectrum {
         unimplemented!()
     }
 }
@@ -126,11 +126,11 @@ impl Bxdf for SpecularFresnel {
         Spectrum::new(0.0)
     }
 
-    fn sample_f(&self, wo: Vector3f, samples: Point2f) -> Option<Sample> {
+    fn sample_f(&self, _wo: Vector3f, _samples: Point2f) -> Option<Sample> {
         unimplemented!()
     }
 
-    fn rho(&self, wo: Option<Vector3f>, n_samples: i32, samples: &[Point2f]) -> Spectrum {
+    fn rho(&self, _wo: Option<Vector3f>, _n_samples: i32, _samples: &[Point2f]) -> Spectrum {
         unimplemented!()
     }
 }

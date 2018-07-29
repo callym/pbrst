@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use prelude::*;
-use bxdf::{ Bsdf, TransportMode };
+use bxdf::TransportMode;
 use super::Primitive;
 use light::Light;
 use material::Material;
@@ -38,11 +38,12 @@ impl Primitive for GeometricPrimitive {
     }
 
     fn get_area_light(&self) -> Option<Arc<Light + Send + Sync>> {
-        self.area_light.as_ref().map(|a| a.clone())
+        self.area_light.as_ref().cloned()
     }
 
-    fn get_material(&self) -> Option<&Box<Material + Send + Sync>> {
+    fn get_material(&self) -> Option<&(Material + Send + Sync)> {
         self.material.as_ref()
+            .map(|m| m.as_ref())
     }
 
     fn compute_scattering_functions<'a>(&'a self, isect: SurfaceInteraction<'a>, arena: &(), mode: TransportMode, allow_multiple_lobes: bool) -> SurfaceInteraction<'a> {

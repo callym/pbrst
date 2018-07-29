@@ -14,6 +14,7 @@ pub(crate) struct TermsOfMotion {
 }
 
 impl TermsOfMotion {
+    #[cfg_attr(feature = "cargo-clippy", allow(too_many_arguments))]
     pub(crate) fn interval_find_zeros(&self, num: usize, p: Point3f, theta: Float, interval: Interval, depth: usize) -> (usize, [Float; 4]) {
         let c1 = self.c1[num].eval(p);
         let c2 = self.c2[num].eval(p);
@@ -43,7 +44,7 @@ impl TermsOfMotion {
                 interval_calc(c1, c2, c3, c4, c5, theta, Interval::new(mid, interval.high), depth - 1, num, zeros);
             } else {
                 let mut t_newton = (interval.low + interval.high) * float(0.5);
-                for i in 0..4 {
+                for _ in 0..4 {
                     let f_newton = c1 +
                         (c2 + c3 + t_newton) * (float(2.0) * theta * t_newton).cos() +
                         (c4 + c5 + t_newton) * (float(2.0) * theta * t_newton).sin();
@@ -55,7 +56,7 @@ impl TermsOfMotion {
                     if f_newton == 0.0 || f_prime_newton == 0.0 {
                         break;
                     }
-                    t_newton = t_newton - f_newton / f_prime_newton;
+                    t_newton -= f_newton / f_prime_newton;
                 }
                 zeros[*num] = t_newton;
                 *num += 1;

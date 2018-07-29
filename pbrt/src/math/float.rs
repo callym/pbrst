@@ -162,7 +162,7 @@ impl Num for Float {
     #[inline(always)]
     fn from_str_radix(src: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
         <FloatPrim as Num>::from_str_radix(src, radix)
-            .map(|f| float(f))
+            .map(float)
     }
 }
 

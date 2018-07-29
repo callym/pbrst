@@ -1,6 +1,5 @@
 use std::cmp::{ min, max };
 use std::mem;
-use std::ops::Add;
 use cg::prelude::*;
 use cg::{ BaseNum, Point2, Point3, Vector2, Vector3 };
 use num::Bounded;
@@ -307,7 +306,7 @@ impl Bounds3f {
 
     pub fn intersect_p(&self, ray: Ray) -> Option<(Option<Float>, Option<Float>)> {
         let mut t0 = float(0.0);
-        let mut t1 = ray.max.unwrap_or(Float::infinity());
+        let mut t1 = ray.max.unwrap_or_else(Float::infinity);
 
         let hit_t0: Option<Float> = None;
         let hit_t1: Option<Float> = None;
@@ -340,7 +339,7 @@ impl Bounds3f {
     }
 
     pub fn intersect_p_precomputed(&self, ray: Ray, inv_dir: Vector3f, dir_is_negative: [bool; 3]) -> bool {
-        let max = ray.max.unwrap_or(Float::infinity());
+        let max = ray.max.unwrap_or_else(Float::infinity);
 
         let is_neg = |neg: bool| if neg { self.max } else { self.min };
         let mut tx_min = (is_neg(dir_is_negative[0]).x - ray.origin.x) * inv_dir.x;

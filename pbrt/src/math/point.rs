@@ -1,7 +1,5 @@
 use std::cmp::{ min, max };
-use num::Float as NumFloat;
 use num::traits::Zero as Zero;
-use num::integer::Roots as _;
 use cg::prelude::*;
 use cg::{ Point2, Point3, Vector2, Vector3 };
 use prelude::*;

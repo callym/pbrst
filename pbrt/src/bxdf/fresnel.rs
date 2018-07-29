@@ -1,4 +1,4 @@
-use std::cmp::{ max, min };
+use std::cmp::max;
 use std::fmt::Debug;
 use std::mem;
 use num;

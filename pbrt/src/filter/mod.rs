@@ -1,4 +1,3 @@
-use std::fmt::Debug;
 use prelude::*;
 
 mod box_triangle;

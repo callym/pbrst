@@ -25,8 +25,8 @@ impl Distribution2d {
 
         let mut marginal_func = Vec::with_capacity(nv);
 
-        for v in 0..nv {
-            marginal_func.push(p_conditional_v[v].func_int);
+        for v in p_conditional_v.iter().take(nv) {
+            marginal_func.push(v.func_int);
         }
 
 

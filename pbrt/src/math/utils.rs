@@ -1,6 +1,4 @@
 use std;
-use cg::prelude::*;
-use cg::Matrix4;
 use num;
 use prelude::*;
 
@@ -19,6 +17,7 @@ pub fn gammaf(n: i32) -> Float {
 }
 
 #[inline(always)]
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub fn gamma_correct(value: Float) -> Float {
     if value <= 0.0031308 {
         float(2.92) * value

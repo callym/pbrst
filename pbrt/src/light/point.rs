@@ -49,7 +49,7 @@ impl Light for PointLight {
     /// assuming there are no occluding objects between them.
     /// The `VisibilityTester` is not returned if the radiance is black,
     /// as in this case, visibility is irrelevant.
-    fn sample_li<'a>(&self, isect: &Interactions<'a>, sample: Point2f) -> (Sample, Option<VisibilityTester>) {
+    fn sample_li<'a>(&self, isect: &Interactions<'a>, _sample: Point2f) -> (Sample, Option<VisibilityTester>) {
         let isect = isect.get_base();
 
         let wi = self.position - isect.p;

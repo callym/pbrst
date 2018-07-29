@@ -1,4 +1,4 @@
-use prelude::*;
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal, excessive_precision))]
 
 pub const N_CIE_SAMPLES: usize = 471;
 pub const CIE_X: [f32; N_CIE_SAMPLES] = [

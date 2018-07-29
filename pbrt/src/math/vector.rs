@@ -1,8 +1,7 @@
 use std::cmp::{ min, max };
-use num::traits::Zero as _;
 use num::integer::Roots as _;
 use cg::prelude::*;
-use cg::{ Point2, Point3, Vector2, Vector3 };
+use cg::{ Point2, Point3, Vector3 };
 use prelude::*;
 
 pub trait VectorExt {
@@ -14,7 +13,6 @@ pub trait VectorExt {
     fn min_dimension(&self) -> Dim;
     fn max_dimension(&self) -> Dim;
 
-    fn length(&self) -> Self::Element;
     fn length_squared(&self) -> Self::Element;
 }
 
@@ -76,11 +74,6 @@ impl VectorExt for $ty {
     #[inline(always)]
     fn length_squared(&self) -> Self::Element {
         self.x.pow(2) + self.y.pow(2)
-    }
-
-    #[inline(always)]
-    fn length(&self) -> Self::Element {
-        self.length().sqrt()
     }
 }
 
@@ -174,11 +167,6 @@ impl VectorExt for $ty {
     #[inline(always)]
     fn length_squared(&self) -> Self::Element {
         self.x.pow(2) + self.y.pow(2) + self.z.pow(2)
-    }
-
-    #[inline(always)]
-    fn length(&self) -> Self::Element {
-        self.length().sqrt()
     }
 }
 

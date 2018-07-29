@@ -1,4 +1,3 @@
-use cg;
 use cg::prelude::*;
 use prelude::*;
 
@@ -71,18 +70,6 @@ impl Ray {
     }
 }
 
-impl From<cg::Vector3<Float>> for Ray {
-    fn from(vec: cg::Vector3<Float>) -> Self {
-        unimplemented!()
-    }
-}
-
-impl Into<cg::Vector3<Float>> for Ray {
-    fn into(self) -> cg::Vector3<Float> {
-        unimplemented!()
-    }
-}
-
 #[derive(Copy, Clone, Debug, Shrinkwrap)]
 #[shrinkwrap(mutable)]
 pub struct RayDifferential {
@@ -117,14 +104,14 @@ impl RayDifferential {
         let o = self.origin;
         let d = self.direction;
 
-        self.x.map(|mut x| {
+        if let Some(x) = &mut self.x {
             x.origin = o + (x.origin - o) * scale;
             x.direction = d + (x.direction - d) * scale;
-        });
+        }
 
-        self.y.map(|mut y| {
+        if let Some(y) = &mut self.y {
             y.origin = o + (y.origin - o) * scale;
             y.direction = d + (y.direction - d) * scale;
-        });
+        }
     }
 }

@@ -25,12 +25,12 @@ impl Distribution1d {
         // transform step function integral into cdf
         let func_int = *cdf.last().unwrap();
         if func_int == 0.0 {
-            for i in 1..=f.len() {
-                cdf[i] = float(i) / float(f.len());
+            for (i, cdf) in cdf.iter_mut().enumerate().take(f.len() + 1).skip(1) {
+                *cdf = float(i) / float(f.len());
             }
         } else {
-            for i in 1..=f.len() {
-                cdf[i] /= func_int;
+            for cdf in cdf.iter_mut().take(f.len() + 1).skip(1) {
+                *cdf /= func_int;
             }
         }
 
@@ -43,6 +43,10 @@ impl Distribution1d {
 
     pub fn len(&self) -> usize {
         self.function.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.function.is_empty()
     }
 
     pub fn sample_continuous(&self, u: Float) -> Distribution1dSample {

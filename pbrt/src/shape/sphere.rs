@@ -1,13 +1,10 @@
 use std::cmp::{ min, max };
-use std::fmt::Debug;
-use std::sync::Arc;
 
 use cg::prelude::*;
 use cg::{ Rad, Deg };
 use num;
 use prelude::*;
 use math::*;
-use math::transform::Transform;
 use interaction::SurfaceInteraction;
 
 use super::{ Shape, ShapeData };
@@ -56,6 +53,8 @@ impl Shape for Sphere {
         )
     }
 
+    #[allow(non_snake_case)]
+    #[cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
     fn intersect<'a>(&'a self, ray: &Ray, _: bool) -> Option<(Float, SurfaceInteraction<'a>)> {
         let phi = float(0.0);
 
@@ -77,7 +76,7 @@ impl Shape for Sphere {
             None => return None,
         };
 
-        let max = ray.max.unwrap_or(Float::infinity());
+        let max = ray.max.unwrap_or_else(Float::infinity);
 
         if t0.upper_bound() > max || t1.lower_bound() <= 0.0 {
             return None;

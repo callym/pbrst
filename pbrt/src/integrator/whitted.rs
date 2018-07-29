@@ -1,9 +1,5 @@
-use std::cmp;
 use std::sync::Arc;
 use cg::prelude::*;
-use cg::Vector3;
-use num_cpus;
-use rayon::prelude::*;
 use prelude::*;
 
 use ::{
@@ -20,7 +16,7 @@ pub struct WhittedParIntegratorData {
 }
 
 impl ParIntegratorData for WhittedParIntegratorData {
-    fn li(&self, mut ray: RayDifferential, scene: &Scene, sampler: &mut Box<Sampler + Send>, arena: &(), depth: i32) -> Spectrum {
+    fn li(&self, mut ray: RayDifferential, scene: &Scene, sampler: &mut Sampler, arena: &(), depth: i32) -> Spectrum {
         let mut l = Spectrum::new(0.0);
 
         if let Some(mut isect) = scene.intersect(&mut ray) {
@@ -35,7 +31,7 @@ impl ParIntegratorData for WhittedParIntegratorData {
             l += isect.le(&wo);
 
             // add contribution of each light source
-            for light in scene.lights.iter() {
+            for light in &scene.lights {
                 let isect = isect.clone();
                 let (sample, visibility) = light.sample_li(&isect.clone().into(), sampler.get_2d());
 
@@ -62,7 +58,7 @@ impl ParIntegratorData for WhittedParIntegratorData {
             }
 
         } else {
-            for light in scene.lights.iter() {
+            for light in &scene.lights {
                 l += light.le(&ray);
             }
         }
@@ -94,12 +90,12 @@ impl SamplerIntegrator for WhittedIntegrator {
         self.camera.clone()
     }
 
-    fn sampler(&self) -> &Box<Sampler> {
-        &self.sampler
+    fn sampler(&self) -> &Sampler {
+        self.sampler.as_ref()
     }
 
-    fn sampler_mut(&mut self) -> &mut Box<Sampler> {
-        &mut self.sampler
+    fn sampler_mut(&mut self) -> &mut Sampler {
+        self.sampler.as_mut()
     }
 
     fn par_data(&self) -> Self::ParIntegratorData {

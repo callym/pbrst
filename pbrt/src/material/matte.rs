@@ -24,9 +24,9 @@ impl MatteMaterial {
 }
 
 impl Material for MatteMaterial {
-    fn compute_scattering_functions<'a>(&self, isect: SurfaceInteraction<'a>, arena: &(), mode: TransportMode, allow_multiple_lobes: bool) -> SurfaceInteraction<'a> {
+    fn compute_scattering_functions<'a>(&self, isect: SurfaceInteraction<'a>, _arena: &(), _mode: TransportMode, _allow_multiple_lobes: bool) -> SurfaceInteraction<'a> {
         let isect = match &self.bump {
-            Some(bump) => super::bump(isect, bump),
+            Some(bump) => super::bump(&isect, bump),
             None => isect,
         };
 

@@ -1,15 +1,13 @@
-use std::cmp::min;
 use std::sync::Arc;
 use cg::prelude::*;
 use prelude::*;
 use interaction::SurfaceInteraction;
 use super::{ Bxdf, BxdfType };
 use interaction::Sample;
-use sampler::ONE_MINUS_EPSILON;
 
 #[derive(Clone, Debug)]
 pub struct Bsdf {
-    eta: Float,
+    pub eta: Float,
     n_s: Normal,
     n_g: Normal,
     ss: Vector3f,
@@ -19,7 +17,7 @@ pub struct Bsdf {
 
 impl Bsdf {
     pub fn new(si: &SurfaceInteraction, eta: Option<Float>) -> Self {
-        let eta = eta.unwrap_or(float(1.0));
+        let eta = eta.unwrap_or_else(|| float(1.0));
 
         Self {
             eta,
@@ -69,18 +67,17 @@ impl Bsdf {
 
         for bxdf in &self.bxdfs {
             let ty = bxdf.ty();
-            if ty.intersects(flags) {
-                if (reflect && ty.contains(BxdfType::Reflection)) ||
-                  (!reflect && ty.contains(BxdfType::Transmission)) {
-                    f += bxdf.f(wo, wi);
-                }
+            if ty.intersects(flags) &&
+                ((reflect && ty.contains(BxdfType::Reflection)) ||
+                (!reflect && ty.contains(BxdfType::Transmission))) {
+                f += bxdf.f(wo, wi);
             }
         }
 
         f
     }
 
-    pub fn sample_f(&self, wo: Vector3f, u: Point2f) -> Option<Sample> {
+    pub fn sample_f(&self, wo: Vector3f, u: Point2f, _ty: BxdfType) -> Option<Sample> {
         // todo - this is wrong
         self.bxdfs[0].sample_f(wo, u)
     }
@@ -124,5 +121,4 @@ impl Bsdf {
 
         f
     }
-
 }
