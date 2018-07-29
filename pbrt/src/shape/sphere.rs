@@ -121,7 +121,14 @@ impl Shape for Sphere {
             }
 
             shape_hit = t1;
-            let p_hit = ray.position(*shape_hit);
+            let mut p_hit = ray.position(*shape_hit);
+
+            // refine sphere intersection point
+            p_hit *= self.radius / Point3f::zero().distance(p_hit);
+
+            if p_hit.x == 0.0 && p_hit.y == 0.0 {
+                p_hit.x = float(1e-5) * self.radius;
+            }
 
             if test(p_hit) {
                 return None;
@@ -162,11 +169,11 @@ impl Shape for Sphere {
         let f = N.dot(d2pduv);
         let g = N.dot(d2pdvv);
 
-        let invEGF2 = float(1.0) / E * G - F.powi(2);
+        let invEGF2 = float(1.0) / (E * G - F.powi(2));
         let dndu: Normal = (dpdu * (f * F - e * G) * invEGF2 +
-            dpdv * (e * F - f * E) * invEGF2).into();
+                            dpdv * (e * F - f * E) * invEGF2).into();
         let dndv: Normal = (dpdu * (g * F - f * G) * invEGF2 +
-            dpdv * (f * F - g * E) * invEGF2).into();
+                            dpdv * (f * F - g * E) * invEGF2).into();
 
         // compute error bounds
         let p_err = p_hit.abs().into_vector() * gammaf(5);

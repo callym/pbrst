@@ -80,8 +80,12 @@ impl Bsdf {
         f
     }
 
-    pub fn sample_f(&self, wo: Vector3f, u: Point2f, sampled_type: BxdfType) -> Option<Sample> {
-        self.bxdfs[0].sample_f(wo, u, sampled_type)
+    pub fn sample_f(&self, wo: Vector3f, u: Point2f) -> Option<Sample> {
+        self.bxdfs[0].sample_f(wo, u)
+    }
+
+    pub fn pdf(&self, wo: Vector3f, wi: Vector3f) -> Float {
+        unimplemented!()
     }
 
     pub fn rho(&self, wo: Option<Vector3f>, n_samples: i32, samples: &[Point2f]) -> Spectrum {

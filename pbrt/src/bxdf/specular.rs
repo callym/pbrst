@@ -17,7 +17,7 @@ impl Bxdf for SpecularReflection {
         Spectrum::new(0.0)
     }
 
-    fn sample_f(&self, wo: Vector3f, _: Point2f, _: BxdfType) -> Option<Sample> {
+    fn sample_f(&self, wo: Vector3f, _: Point2f) -> Option<Sample> {
         let wi = Vector3f::new(-wo.x, -wo.y, wo.z);
 
         Some(Sample {
@@ -63,7 +63,7 @@ impl Bxdf for SpecularTransmission {
         Spectrum::new(0.0)
     }
 
-    fn sample_f(&self, wo: Vector3f, samples: Point2f, sampled_type: BxdfType) -> Option<Sample> {
+    fn sample_f(&self, wo: Vector3f, samples: Point2f) -> Option<Sample> {
         // which eta is incident and which is transmitted
         let (eta_i, eta_t) = if cos_theta(wo) > 0.0 {
             (self.eta_a, self.eta_b)
@@ -126,7 +126,7 @@ impl Bxdf for SpecularFresnel {
         Spectrum::new(0.0)
     }
 
-    fn sample_f(&self, wo: Vector3f, samples: Point2f, sampled_type: BxdfType) -> Option<Sample> {
+    fn sample_f(&self, wo: Vector3f, samples: Point2f) -> Option<Sample> {
         unimplemented!()
     }
 

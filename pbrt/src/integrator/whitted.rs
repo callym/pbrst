@@ -29,14 +29,15 @@ impl ParIntegratorData for WhittedParIntegratorData {
             let wo = isect.wo;
 
             // compute scattering fn for surface interaction
-            isect.compute_scattering_functions(&ray, &arena, TransportMode::Camera, false);
+            isect.compute_scattering_functions(&ray, &arena, TransportMode::Radiance, false);
 
             // compute emitted light if ray hit area light source
             l += isect.le(&wo);
 
             // add contribution of each light source
             for light in scene.lights.iter() {
-                let (sample, visibility) = light.sample_li(&isect, sampler.get_2d());
+                let isect = isect.clone();
+                let (sample, visibility) = light.sample_li(&isect.clone().into(), sampler.get_2d());
 
                 if sample.li.is_black() || sample.pdf == 0.0 {
                     continue;

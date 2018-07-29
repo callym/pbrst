@@ -4,6 +4,7 @@ use bxdf::TransportMode;
 use super::Primitive;
 use shape::Shape;
 use interaction::SurfaceInteraction;
+use light::Light;
 use material::Material;
 use math::transform::AnimatedTransform;
 
@@ -42,7 +43,7 @@ impl Primitive for TransformedPrimitive {
         self.primitive_to_world.motion_bounds(self.primitive.world_bound())
     }
 
-    fn get_area_light(&self) -> Option<Arc<()>> {
+    fn get_area_light(&self) -> Option<Arc<Light + Send + Sync>> {
         panic!("TransformedPrimitive::get_area_light should never be called")
     }
 

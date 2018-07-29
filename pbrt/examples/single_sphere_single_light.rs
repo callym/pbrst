@@ -63,27 +63,27 @@ fn main() {
     };
     let primitive = Arc::new(primitive);
 
-    let light: Box<Light> = {
+    let light = {
         let transform = Matrix4::from_translation(Vector3f::new(
-            float(1.0),
-            float(1.0),
-            float(0.0),
+            float(5.0),
+            float(3.0),
+            float(4.0),
         ));
         let transform = Transform::new(transform);
         let transform = Arc::new(transform);
 
         let light = PointLight::new(Spectrum::from_rgb([
-                float(1000.0),
-                float(1000.0),
-                float(1000.0),
-            ], SpectrumType::Illumination),
+                float(1.0),
+                float(1.0),
+                float(1.0),
+            ], SpectrumType::Illumination) * float(10.0),
             transform);
         Box::new(light)
     };
 
     let camera = {
         let film = {
-            let full_resolution = Point2i::new(100, 100);
+            let full_resolution = Point2i::new(512, 512);
             let crop_window = Bounds2f::new(
                 Point2f::new(float(0.0), float(0.0)),
                 Point2f::new(float(1.0), float(1.0)),
@@ -106,7 +106,7 @@ fn main() {
         let transform = Matrix4::from_translation(Vector3f::new(
             float(0.0),
             float(0.0),
-            float(-5.0),
+            float(5.0),
         ));
         let transform = Transform::new(transform);
         let transform = Arc::new(transform);
@@ -118,7 +118,7 @@ fn main() {
         );
 
         let screen_window = Bounds2f::new(
-            Point2f::new(float(0.0), float(0.0)),
+            Point2f::new(float(-1.0), float(-1.0)),
             Point2f::new(float(1.0), float(1.0)),
         );
 
@@ -129,7 +129,7 @@ fn main() {
             float(1.0),
             float(0.0),
             float(1.0),
-            Deg(float(60.0)),
+            Deg(float(45.0)),
             film,
             None
         );
@@ -139,8 +139,8 @@ fn main() {
     let scene = Scene::new(primitive, vec![light]);
 
     let sampler = StratifiedSampler::new(
-        2,
-        2,
+        4,
+        4,
         true,
         2,
         123456789,
@@ -149,5 +149,5 @@ fn main() {
 
     let mut integrator = WhittedIntegrator::new(2, camera, sampler);
 
-    integrator.render(&scene);
+    integrator.render(scene);
 }

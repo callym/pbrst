@@ -2,9 +2,10 @@ use std::sync::Arc;
 use cg::prelude::*;
 use prelude::*;
 use super::{ Light, LightType, VisibilityTester };
-use interaction::{ Interaction, Sample };
+use interaction::{ Interactions, BaseInteraction, Sample };
 use math::Transform;
 
+#[derive(Debug)]
 pub struct PointLight {
     light_to_world: Arc<Transform>,
     world_to_light: Arc<Transform>,
@@ -17,8 +18,8 @@ impl PointLight {
         Self {
             spectrum,
             world_to_light: Arc::new(light_to_world.inverse()),
+            position: light_to_world.transform_point(Point3f::zero()),
             light_to_world,
-            position: Point3f::zero(),
         }
     }
 }
@@ -48,9 +49,11 @@ impl Light for PointLight {
     /// assuming there are no occluding objects between them.
     /// The `VisibilityTester` is not returned if the radiance is black,
     /// as in this case, visibility is irrelevant.
-    fn sample_li(&self, isect: &Interaction, sample: Point2f) -> (Sample, Option<VisibilityTester>) {
+    fn sample_li<'a>(&self, isect: &Interactions<'a>, sample: Point2f) -> (Sample, Option<VisibilityTester>) {
+        let isect = isect.get_base();
+
         let wi = self.position - isect.p;
-        let vis = VisibilityTester::new(isect.clone(), Interaction {
+        let vis = VisibilityTester::new(isect.clone(), BaseInteraction {
             p: self.position,
             time: isect.time,
             p_err: Vector3f::zero(),

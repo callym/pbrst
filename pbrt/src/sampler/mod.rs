@@ -39,9 +39,9 @@ pub trait Sampler {
 
     fn request_2d_vec(&mut self, n: u32);
 
-    fn get_1d_vec(&mut self, n: u32) -> Option<&[Float]>;
+    fn get_1d_vec(&mut self, n: u32) -> Option<Vec<Float>>;
 
-    fn get_2d_vec(&mut self, n: u32) -> Option<&[Point2f]>;
+    fn get_2d_vec(&mut self, n: u32) -> Option<Vec<Point2f>>;
 
     fn round_count(&self, n: u32) -> u32 {
         n

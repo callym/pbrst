@@ -1,12 +1,15 @@
+use std::cmp::min;
 use std::sync::Arc;
 use cg;
+use cg::prelude::*;
 
 use prelude::*;
 use bxdf::{ Bxdf, BxdfType };
+use light::Light;
 use math::*;
 use sampler::Sampler;
 use scene::Scene;
-use interaction::SurfaceInteraction;
+use interaction::{ Interactions, BaseInteraction, SurfaceInteraction };
 use super::ParIntegratorData;
 
 pub fn specular_reflect(integrator: &impl ParIntegratorData, ray: &RayDifferential, isect: &SurfaceInteraction, scene: &Scene, sampler: &mut Box<Sampler + Send>, arena: &(), depth: i32) -> Spectrum {
@@ -20,7 +23,7 @@ pub fn specular_reflect(integrator: &impl ParIntegratorData, ray: &RayDifferenti
         None => return Spectrum::new(0.0),
     };
 
-    let f = match bsdf.sample_f(wo, sampler.get_2d(), ty) {
+    let f = match bsdf.sample_f(wo, sampler.get_2d()) {
         Some(f) => f,
         None => return Spectrum::new(0.0),
     };
@@ -34,7 +37,7 @@ pub fn specular_reflect(integrator: &impl ParIntegratorData, ray: &RayDifferenti
         let rd = isect.spawn_ray(&f.wi);
         let rd = RayDifferential::from_ray(rd);
 
-        f.li * integrator.li(rd, scene, sampler, arena, depth + 1) * cg::dot(f.wi.into(), *ns) / f.pdf
+        f.li * integrator.li(rd, scene, sampler, arena, depth + 1) * (cg::dot(f.wi.into(), *ns) / f.pdf)
     } else {
         Spectrum::new(0.0)
     }
@@ -51,7 +54,7 @@ pub fn specular_transmit(integrator: &impl ParIntegratorData, ray: &RayDifferent
         None => return Spectrum::new(0.0),
     };
 
-    let f = match bsdf.sample_f(wo, sampler.get_2d(), ty) {
+    let f = match bsdf.sample_f(wo, sampler.get_2d()) {
         Some(f) => f,
         None => return Spectrum::new(0.0),
     };
@@ -65,7 +68,7 @@ pub fn specular_transmit(integrator: &impl ParIntegratorData, ray: &RayDifferent
         let rd = isect.spawn_ray(&f.wi);
         let rd = RayDifferential::from_ray(rd);
 
-        f.li * integrator.li(rd, scene, sampler, arena, depth + 1) * cg::dot(f.wi.into(), *ns) / f.pdf
+        f.li * integrator.li(rd, scene, sampler, arena, depth + 1) * (cg::dot(f.wi.into(), *ns) / f.pdf)
     } else {
         Spectrum::new(0.0)
     }

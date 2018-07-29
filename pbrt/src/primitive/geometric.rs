@@ -2,6 +2,7 @@ use std::sync::Arc;
 use prelude::*;
 use bxdf::{ Bsdf, TransportMode };
 use super::Primitive;
+use light::Light;
 use material::Material;
 use shape::Shape;
 use interaction::SurfaceInteraction;
@@ -10,7 +11,7 @@ use interaction::SurfaceInteraction;
 pub struct GeometricPrimitive {
     pub shape: Arc<Shape + Send + Sync>,
     pub material: Option<Box<Material + Send + Sync>>,
-    pub area_light: Option<Arc<()>>,
+    pub area_light: Option<Arc<Light + Send + Sync>>,
     pub medium_interface: Option<()>,
 }
 
@@ -36,7 +37,7 @@ impl Primitive for GeometricPrimitive {
         self.shape.world_bound()
     }
 
-    fn get_area_light(&self) -> Option<Arc<()>> {
+    fn get_area_light(&self) -> Option<Arc<Light + Send + Sync>> {
         self.area_light.as_ref().map(|a| a.clone())
     }
 

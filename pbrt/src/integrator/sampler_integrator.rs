@@ -24,10 +24,14 @@ pub trait SamplerIntegrator: Integrator {
 
     fn par_data(&self) -> Self::ParIntegratorData;
 
+    fn preprocess(&mut self, _scene: &Scene, _sampler: &mut Box<Sampler + Send>) {
+
+    }
+
     fn render(&mut self, scene: Arc<Scene>) {
         const TILE_SIZE: i32 = 16;
 
-        self.preprocess(&*scene, &mut self.sampler().create_new(0));
+        <Self as SamplerIntegrator>::preprocess(self, &*scene, &mut self.sampler().create_new(0));
 
         let sample_bounds = {
             let camera = self.camera();
@@ -140,5 +144,9 @@ pub trait SamplerIntegrator: Integrator {
 impl<T: SamplerIntegrator> Integrator for T {
     fn render(&mut self, scene: Scene) {
         <Self as SamplerIntegrator>::render(self, Arc::new(scene));
+    }
+
+    fn preprocess(&mut self, scene: &Scene, sampler: &mut Box<Sampler + Send>) {
+        <Self as SamplerIntegrator>::preprocess(self, scene, sampler);
     }
 }

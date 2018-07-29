@@ -117,11 +117,11 @@ impl Sampler for StratifiedSampler {
         self.pixel.request_2d_vec(n)
     }
 
-    fn get_1d_vec(&mut self, n: u32) -> Option<&[Float]> {
+    fn get_1d_vec(&mut self, n: u32) -> Option<Vec<Float>> {
         self.pixel.get_1d_vec(n)
     }
 
-    fn get_2d_vec(&mut self, n: u32) -> Option<&[Point2f]> {
+    fn get_2d_vec(&mut self, n: u32) -> Option<Vec<Point2f>> {
         self.pixel.get_2d_vec(n)
     }
 }

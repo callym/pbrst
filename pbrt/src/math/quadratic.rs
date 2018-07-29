@@ -13,11 +13,11 @@ pub fn quadratic(a: Efloat, b: Efloat, c: Efloat) -> Option<(Efloat, Efloat)> {
         None
     } else {
         let root_discrim = discrim.sqrt();
-        let root_discrim = efloat(root_discrim as f32, MACHINE_EPSILON as f32 * root_discrim as f32);
+        let root_discrim = efloat(root_discrim as FloatPrim, MACHINE_EPSILON as FloatPrim * root_discrim as FloatPrim);
         let q = if b < 0.0 {
-            (b - root_discrim) * efloat0(0.5)
+            (b - root_discrim) * efloat0(-0.5)
         } else {
-            (b + root_discrim) * efloat0(0.5)
+            (b + root_discrim) * efloat0(-0.5)
         };
         let mut t0 = q / a;
         let mut t1 = c / q;

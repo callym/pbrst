@@ -22,8 +22,8 @@ use self::utils::*;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TransportMode {
-    Camera,
-    Light,
+    Radiance,
+    Importance,
 }
 
 bitflags! {
@@ -41,7 +41,7 @@ pub trait Bxdf: Debug {
 
     fn f(&self, wo: Vector3f, wi: Vector3f) -> Spectrum;
 
-    fn sample_f(&self, wo: Vector3f, u: Point2f, _: BxdfType) -> Option<Sample> {
+    fn sample_f(&self, wo: Vector3f, u: Point2f) -> Option<Sample> {
         let mut wi = cosine_sample_hemisphere(u);
         if wo.z < 0.0 {
             wi.z *= float(-1.0);
@@ -84,8 +84,8 @@ impl<B: Bxdf> Bxdf for ScaledBxdf<B> {
         self.scale * self.bxdf.f(wo, wi)
     }
 
-    fn sample_f(&self, wo: Vector3f, sample: Point2f, sampled_type: BxdfType) -> Option<Sample> {
-        if let Some(mut sample) = self.bxdf.sample_f(wo, sample, sampled_type) {
+    fn sample_f(&self, wo: Vector3f, sample: Point2f) -> Option<Sample> {
+        if let Some(mut sample) = self.bxdf.sample_f(wo, sample) {
             sample.li *= self.scale;
             Some(sample)
         } else {

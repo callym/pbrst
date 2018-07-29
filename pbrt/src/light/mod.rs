@@ -1,6 +1,7 @@
+use std::fmt::Debug;
 use prelude::*;
 use scene::Scene;
-use interaction::{ Interaction, Sample };
+use interaction::{ Interactions, BaseInteraction, Sample };
 use sampler::Sampler;
 use math::*;
 use math::Transform;
@@ -19,7 +20,7 @@ bitflags! {
     }
 }
 
-pub trait Light {
+pub trait Light: Debug {
     fn ty(&self) -> LightType;
 
     fn is_delta_light(&self) -> bool {
@@ -46,18 +47,18 @@ pub trait Light {
     /// assuming there are no occluding objects between them.
     /// The `VisibilityTester` is not returned if the radiance is black,
     /// as in this case, visibility is irrelevant.
-    fn sample_li(&self, isect: &Interaction, sample: Point2f) -> (Sample, Option<VisibilityTester>);
+    fn sample_li<'a>(&self, isect: &Interactions<'a>, sample: Point2f) -> (Sample, Option<VisibilityTester>);
 
     fn power(&self) -> Spectrum;
 }
 
 pub struct VisibilityTester {
-    pub p0: Interaction,
-    pub p1: Interaction,
+    pub p0: BaseInteraction,
+    pub p1: BaseInteraction,
 }
 
 impl VisibilityTester {
-    pub fn new(p0: Interaction, p1: Interaction) -> Self {
+    pub fn new(p0: BaseInteraction, p1: BaseInteraction) -> Self {
         Self { p0, p1 }
     }
 

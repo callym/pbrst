@@ -7,6 +7,45 @@ use bxdf::{ Bsdf, BxdfType, TransportMode };
 use primitive::Primitive;
 use shape::Shape;
 
+pub enum Interactions<'a> {
+    Interaction(BaseInteraction),
+    SurfaceInteraction(SurfaceInteraction<'a>),
+}
+
+impl<'a> Interactions<'a> {
+    pub fn get_base(&self) -> &BaseInteraction {
+        match self {
+            Interactions::Interaction(isect) => isect,
+            Interactions::SurfaceInteraction(isect) => &**isect,
+        }
+    }
+
+    pub fn get_surface(&self) -> Option<&SurfaceInteraction> {
+        match self {
+            Interactions::Interaction(_) => None,
+            Interactions::SurfaceInteraction(isect) => Some(isect),
+        }
+    }
+}
+
+impl<'a> From<BaseInteraction> for Interactions<'a> {
+    fn from(si: BaseInteraction) -> Self {
+        Interactions::Interaction(si)
+    }
+}
+
+impl<'a> From<SurfaceInteraction<'a>> for Interactions<'a> {
+    fn from(si: SurfaceInteraction<'a>) -> Self {
+        Interactions::SurfaceInteraction(si)
+    }
+}
+
+impl<'a> Into<BaseInteraction> for Interactions<'a> {
+    fn into(self) -> BaseInteraction {
+        self.get_base().clone()
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 pub struct Shading {
     pub n: Normal,
@@ -17,7 +56,7 @@ pub struct Shading {
 }
 
 #[derive(Clone, Debug)]
-pub struct Interaction {
+pub struct BaseInteraction {
     pub p: Point3f,
     pub time: Float,
     pub p_err: Vector3f,
@@ -26,7 +65,7 @@ pub struct Interaction {
     pub medium: Option<()>,
 }
 
-impl Interaction {
+impl BaseInteraction {
     pub fn new(p: Point3f, n: Normal, p_err: Vector3f, wo: Vector3f, time: Float, medium: Option<()>) -> Self {
         Self {
             p,
@@ -68,7 +107,7 @@ impl Interaction {
 #[shrinkwrap(mutable)]
 pub struct SurfaceInteraction<'a> {
     #[shrinkwrap(main_field)]
-    pub interaction: Interaction,
+    pub interaction: BaseInteraction,
     pub n: Normal,
     pub uv: Point2f,
     pub dudx: Float,
@@ -110,7 +149,7 @@ impl<'a> SurfaceInteraction<'a> {
             *n *= float(-1.0);
         }
 
-        let interaction = Interaction::new(p, n, p_err, wo, time, None);
+        let interaction = BaseInteraction::new(p, n, p_err, wo, time, None);
 
         // init shading geom from true geom
         let shading = Shading {

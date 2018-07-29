@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use prelude::*;
 use bxdf::{ Bsdf, TransportMode };
+use light::Light;
 use material::Material;
 use math::*;
 use interaction::SurfaceInteraction;
@@ -19,7 +20,7 @@ pub trait Primitive: Debug + Send + Sync {
 
     fn world_bound(&self) -> Bounds3<Float>;
 
-    fn get_area_light(&self) -> Option<Arc<()>>;
+    fn get_area_light(&self) -> Option<Arc<Light + Send + Sync>>;
 
     fn get_material(&self) -> Option<&Box<Material + Send + Sync>>;
 

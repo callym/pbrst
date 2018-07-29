@@ -43,3 +43,9 @@ impl Normal {
         self.0.normalize().into()
     }
 }
+
+impl Default for Normal {
+    fn default() -> Self {
+        Self::zero()
+    }
+}

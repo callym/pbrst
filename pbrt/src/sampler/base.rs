@@ -63,7 +63,7 @@ impl BaseSamplerData {
         self.current_pixel_sample_index < self.samples_per_pixel
     }
 
-    pub fn get_1d_array(&mut self, n: u32) -> Option<&[Float]> {
+    pub fn get_1d_array(&mut self, n: u32) -> Option<Vec<Float>> {
         if self.offset_1d >= self.samples_array_1d.len() {
             None
         } else if self.samples_array_1d_sizes[self.offset_1d] != n {
@@ -75,11 +75,11 @@ impl BaseSamplerData {
             let start: usize = (self.current_pixel_sample_index * n as u64) as usize;
             let end = start + n as usize;
 
-            Some(&self.samples_array_1d[o][start..end])
+            Some(self.samples_array_1d[o][start..end].to_vec())
         }
     }
 
-    pub fn get_2d_array(&mut self, n: u32) -> Option<&[Point2f]> {
+    pub fn get_2d_array(&mut self, n: u32) -> Option<Vec<Point2f>> {
         if self.offset_2d >= self.samples_array_2d.len() {
             None
         } else if self.samples_array_2d_sizes[self.offset_2d] != n {
@@ -91,7 +91,7 @@ impl BaseSamplerData {
             let start: usize = (self.current_pixel_sample_index * n as u64) as usize;
             let end = start + n as usize;
 
-            Some(&self.samples_array_2d[o][start..end])
+            Some(self.samples_array_2d[o][start..end].to_vec())
         }
     }
 }
@@ -216,11 +216,11 @@ impl PixelSamplerData {
         }
     }
 
-    pub fn get_1d_vec(&mut self, n: u32) -> Option<&[Float]> {
+    pub fn get_1d_vec(&mut self, n: u32) -> Option<Vec<Float>> {
         self.base.get_1d_array(n)
     }
 
-    pub fn get_2d_vec(&mut self, n: u32) -> Option<&[Point2f]> {
+    pub fn get_2d_vec(&mut self, n: u32) -> Option<Vec<Point2f>> {
         self.base.get_2d_array(n)
     }
 
