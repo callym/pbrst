@@ -11,7 +11,8 @@ use pbrt::prelude::*;
 use pbrt::camera::PerspectiveCamera;
 use pbrt::film::Film;
 use pbrt::filter::TriangleFilter;
-use pbrt::integrator::{ Integrator, WhittedIntegrator };
+use pbrt::integrator::{ Integrator, DirectLightingIntegrator, WhittedIntegrator };
+use pbrt::integrator::LightStrategy;
 use pbrt::light::{ Light, PointLight };
 use pbrt::material::MatteMaterial;
 use pbrt::math::{ AnimatedTransform, Transform };
@@ -147,7 +148,8 @@ fn main() {
     );
     let sampler = Box::new(sampler);
 
-    let mut integrator = WhittedIntegrator::new(2, camera, sampler);
+//    let mut integrator = WhittedIntegrator::new(2, camera, sampler);
+    let mut integrator = DirectLightingIntegrator::new(2, LightStrategy::UniformSampleOne, camera, sampler);
 
     integrator.render(scene);
 }

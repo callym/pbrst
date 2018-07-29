@@ -7,6 +7,9 @@ use ::{
 pub mod sampler_integrator;
 pub use self::sampler_integrator::{ ParIntegratorData, SamplerIntegrator };
 
+pub mod direct_lighting;
+pub use self::direct_lighting::{ DirectLightingIntegrator, LightStrategy };
+
 pub mod whitted;
 pub use self::whitted::WhittedIntegrator;
 

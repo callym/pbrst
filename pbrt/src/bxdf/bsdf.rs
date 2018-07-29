@@ -81,11 +81,38 @@ impl Bsdf {
     }
 
     pub fn sample_f(&self, wo: Vector3f, u: Point2f) -> Option<Sample> {
+        // todo - this is wrong
         self.bxdfs[0].sample_f(wo, u)
     }
 
-    pub fn pdf(&self, wo: Vector3f, wi: Vector3f) -> Float {
-        unimplemented!()
+    pub fn pdf(&self, wo_w: Vector3f, wi_w: Vector3f, flags: BxdfType) -> Float {
+        if self.bxdfs.is_empty() {
+            return float(0.0);
+        }
+
+        let wi = self.world_to_local(wi_w);
+        let wo = self.world_to_local(wo_w);
+
+        if wo.z == 0.0 {
+            return float(0.0);
+        }
+
+        let mut pdf = float(0.0);
+        let mut matching = 0;
+
+        for bxdf in &self.bxdfs {
+            let ty = bxdf.ty();
+            if ty.intersects(flags) {
+                matching += 1;
+                pdf += bxdf.pdf(wo, wi);
+            }
+        }
+
+        if matching > 0 {
+            pdf / float(matching)
+        } else {
+            float(0.0)
+        }
     }
 
     pub fn rho(&self, wo: Option<Vector3f>, n_samples: i32, samples: &[Point2f]) -> Spectrum {
