@@ -2,7 +2,7 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use prelude::*;
 use math::*;
-use math::transform::Transform;
+use math::Transform;
 use interaction::SurfaceInteraction;
 
 mod cylinder;

@@ -5,7 +5,7 @@ use bxdf::TransportMode;
 use interaction::SurfaceInteraction;
 use texture::Texture;
 
-pub mod matte;
+mod matte;
 pub use self::matte::MatteMaterial;
 
 pub trait Material: Debug {

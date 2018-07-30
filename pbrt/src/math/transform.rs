@@ -1,7 +1,6 @@
 use std::sync::Arc;
 use std::cmp::max;
 use cg::prelude::*;
-use cg;
 use cg::Matrix4;
 use cg::Matrix3;
 use cg::Quaternion;

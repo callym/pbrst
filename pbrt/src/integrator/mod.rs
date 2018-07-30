@@ -1,16 +1,16 @@
 use scene::Scene;
 use sampler::Sampler;
 
-pub mod sampler_integrator;
+mod sampler_integrator;
 pub use self::sampler_integrator::{ ParIntegratorData, SamplerIntegrator };
 
-pub mod direct_lighting;
+mod direct_lighting;
 pub use self::direct_lighting::{ DirectLightingIntegrator, LightStrategy };
 
-pub mod whitted;
+mod whitted;
 pub use self::whitted::WhittedIntegrator;
 
-mod utils;
+pub mod utils;
 
 pub trait Integrator {
     fn render(&mut self, scene: Scene);

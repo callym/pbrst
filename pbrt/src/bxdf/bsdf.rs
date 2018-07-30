@@ -1,4 +1,4 @@
-use std::cmp::{ min, max };
+use std::cmp::min;
 use std::sync::Arc;
 use cg::prelude::*;
 use prelude::*;

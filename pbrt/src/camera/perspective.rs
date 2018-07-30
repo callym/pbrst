@@ -2,7 +2,7 @@ use cg;
 use cg::Rad;
 use cg::prelude::*;
 use prelude::*;
-use math::transform::Transform;
+use math::Transform;
 #[macro_use] use super::*;
 
 #[allow(dead_code)]

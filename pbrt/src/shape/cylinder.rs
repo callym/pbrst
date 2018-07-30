@@ -20,7 +20,7 @@ pub struct Cylinder {
 }
 
 impl Cylinder {
-    pub fn new(radius: Float, z_min: Float, z_max: Float, phi_max: impl Into<Rad<Float>>, mut data: ShapeData) -> Self {
+    pub fn new(radius: Float, z_min: Float, z_max: Float, phi_max: impl Into<Rad<Float>>, data: ShapeData) -> Self {
         let z_min = min(z_min, z_max);
         let z_max = max(z_min, z_max);
 

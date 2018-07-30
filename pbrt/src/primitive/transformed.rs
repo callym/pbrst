@@ -5,7 +5,7 @@ use super::Primitive;
 use interaction::SurfaceInteraction;
 use light::Light;
 use material::Material;
-use math::transform::AnimatedTransform;
+use math::AnimatedTransform;
 
 #[derive(Clone, Debug)]
 pub struct TransformedPrimitive {

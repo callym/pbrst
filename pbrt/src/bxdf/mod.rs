@@ -4,16 +4,16 @@ use math::*;
 use interaction::Sample;
 use sampling::utils::*;
 
-pub mod bsdf;
+mod bsdf;
 pub use self::bsdf::*;
 
-pub mod fresnel;
+mod fresnel;
 pub use self::fresnel::*;
 
-pub mod lambertian;
+mod lambertian;
 pub use self::lambertian::*;
 
-pub mod specular;
+mod specular;
 pub use self::specular::*;
 
 pub mod utils;

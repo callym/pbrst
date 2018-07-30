@@ -5,10 +5,10 @@ use sampler::CameraSample;
 
 #[macro_use] mod macros;
 
-pub mod orthographic;
+mod orthographic;
 pub use self::orthographic::OrthographicCamera;
 
-pub mod perspective;
+mod perspective;
 pub use self::perspective::PerspectiveCamera;
 
 pub trait Camera {

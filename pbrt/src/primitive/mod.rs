@@ -6,10 +6,10 @@ use material::Material;
 use math::*;
 use interaction::SurfaceInteraction;
 
-pub mod geometric;
+mod geometric;
 pub use self::geometric::GeometricPrimitive;
 
-pub mod transformed;
+mod transformed;
 pub use self::transformed::TransformedPrimitive;
 
 pub trait Primitive: Debug + Send + Sync {

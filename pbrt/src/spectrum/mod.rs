@@ -6,19 +6,19 @@ use prelude::*;
 
 #[macro_use] mod macros;
 
-pub mod rgb;
+mod rgb;
 pub use self::rgb::RgbSpectrum;
 
-pub mod rgb_consts;
+mod rgb_consts;
 pub use self::rgb_consts::*;
 
-pub mod sampled;
+mod sampled;
 pub use self::sampled::SampledSpectrum;
 
 pub mod utils;
 pub use self::utils::*;
 
-pub mod xyz_consts;
+mod xyz_consts;
 pub use self::xyz_consts::*;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

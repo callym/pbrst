@@ -1,45 +1,45 @@
-pub mod bounds;
+mod bounds;
 pub use self::bounds::*;
 
-pub mod consts;
+mod consts;
 pub use self::consts::*;
 
-pub mod derivative;
+mod derivative;
 pub use self::derivative::*;
 
-pub mod efloat;
+mod efloat;
 pub use self::efloat::*;
 
-pub mod float;
+mod float;
 pub use self::float::*;
 
-pub mod interval;
+mod interval;
 pub use self::interval::*;
 
-pub mod normal;
+mod normal;
 pub use self::normal::*;
 
-pub mod point;
+mod point;
 pub use self::point::*;
 
-pub mod quadratic;
+mod quadratic;
 pub use self::quadratic::*;
 
-pub mod radiometry;
+mod radiometry;
 pub use self::radiometry::*;
 
-pub mod ray;
+mod ray;
 pub use self::ray::*;
 
 pub(crate) mod terms_of_motion;
 pub(crate) use self::terms_of_motion::*;
 
-pub mod transform;
+mod transform;
 pub use self::transform::*;
 pub use self::transform::Transform;
 
 pub mod utils;
 pub use self::utils::*;
 
-pub mod vector;
+mod vector;
 pub use self::vector::*;
