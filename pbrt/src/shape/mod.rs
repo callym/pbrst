@@ -5,8 +5,11 @@ use math::*;
 use math::transform::Transform;
 use interaction::SurfaceInteraction;
 
-pub mod sphere;
-pub use self::sphere::*;
+mod cylinder;
+pub use self::cylinder::Cylinder;
+
+mod sphere;
+pub use self::sphere::Sphere;
 
 #[derive(Clone, Debug)]
 pub struct ShapeData {
