@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use std::cmp::max;
 use cg::prelude::*;
+use cg;
 use cg::Matrix4;
 use cg::Matrix3;
 use cg::Quaternion;
@@ -28,7 +29,7 @@ impl Transform {
     }
 
     pub fn new(matrix: Matrix4f) -> Self {
-        let inverse = matrix.inverse_transform().unwrap();
+        let inverse = matrix.invert().unwrap();
 
         Self {
             matrix,
@@ -122,8 +123,16 @@ impl Transform {
     }
 
     pub fn transform_normal(&self, normal: Normal) -> Normal {
-        let transpose = self.inverse.transpose();
-        transpose.transform_vector(*normal).into()
+        let t = self.inverse;
+        let Vector3f { x, y, z } = *normal;
+
+        // this transforms by the transpose of the inverse
+        // without having to calculate the transpose
+        Normal::new(
+            t[0][0] * x + t[0][1] * y + t[0][2] * z,
+            t[1][0] * x + t[1][1] * y + t[1][2] * z,
+            t[2][0] * x + t[2][1] * y + t[2][2] * z,
+        )
     }
 
     pub fn transform_ray_data(&self, ray: RayData) -> RayData {
@@ -137,8 +146,16 @@ impl Transform {
     }
 
     pub fn transform_ray_data_with_error(&self, ray: RayData) -> (RayData, Vector3f, Vector3f) {
-        let (origin, o_err) = self.transform_point_with_error(ray.origin);
+        let (mut origin, o_err) = self.transform_point_with_error(ray.origin);
         let (direction, d_err) = self.transform_vector_with_error(ray.direction);
+
+        let length_squared = ray.direction.length_squared();
+
+        if length_squared > 0.0 {
+            let dir = direction;
+            let dt = dir.abs().dot(o_err) / length_squared;
+            origin += dir * dt;
+        }
 
         (RayData {
             origin,
@@ -174,6 +191,16 @@ impl Transform {
 
         ray.origin = origin;
         ray.direction = direction;
+
+        let length_squared = ray.direction.length_squared();
+        let max = ray.max.unwrap_or_else(Float::infinity);
+
+        if length_squared > 0.0 {
+            let dir = ray.direction;
+            let dt = dir.abs().dot(o_err) / length_squared;
+            ray.origin += dir * dt;
+            ray.max = Some(max - dt);
+        }
 
         (ray, o_err, d_err)
     }
@@ -212,7 +239,7 @@ impl Transform {
         ret.p = p;
         ret.p_err = p_err;
 
-        ret.n = self.transform_normal(ret.n).normalize();
+        ret.n = Some(self.transform_normal(ret.n.unwrap()).normalize());
         ret.interaction.wo = self.transform_vector(ret.interaction.wo).normalize();
 
         ret.dpdu = self.transform_vector(ret.dpdu);
@@ -226,7 +253,10 @@ impl Transform {
         ret.shading.dndu = self.transform_normal(ret.shading.dndu);
         ret.shading.dndv = self.transform_normal(ret.shading.dndv);
 
-        ret.shading.n = ret.shading.n.face_forward(ret.n);
+        ret.dpdx = self.transform_vector(ret.dpdx);
+        ret.dpdy = self.transform_vector(ret.dpdy);
+
+        ret.shading.n = ret.shading.n.face_forward(ret.n.unwrap());
 
         ret
     }
@@ -262,7 +292,7 @@ impl Into<Decomposed> for Transform {
 
         while count < 100 && norm > 0.0001 {
             let mut r_next = Matrix4::zero();
-            let r_it = r.transpose().inverse_transform().unwrap();
+            let r_it = r.transpose().invert().unwrap();
 
             for i in 0..4 {
                 for j in 0..4 {
@@ -284,18 +314,18 @@ impl Into<Decomposed> for Transform {
         };
 
         // convert r into a quaternion
-        let trace = r[0][0] + r[1][1] + r[2][2];
+        let trace = float(1.0) + r[0][0] + r[1][1] + r[2][2];
         let r_q = if trace > 0.0 {
             // compute w from matrix trace, then xyz
-            let s = (trace + float(1.0)).sqrt();
-            let w = s / float(2.0);
-            let s = float(0.5) / s;
+            let s = trace.sqrt() * float(2.0);
+            let w = s * float(0.25);
+            let s = float(1.0) / s;
 
             Quaternion {
                 v: Vector3f::new(
-                    r[1][2] - r[2][1] * s,
-                    r[2][0] - r[0][2] * s,
-                    r[0][1] - r[1][0] * s,
+                    (r[1][2] - r[2][1]) * s,
+                    (r[2][0] - r[0][2]) * s,
+                    (r[0][1] - r[1][0]) * s,
                 ),
                 s: w,
             }

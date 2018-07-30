@@ -108,7 +108,6 @@ impl BaseInteraction {
 pub struct SurfaceInteraction<'a> {
     #[shrinkwrap(main_field)]
     pub interaction: BaseInteraction,
-    pub n: Normal,
     pub uv: Point2f,
     pub dudx: Float,
     pub dvdx: Float,
@@ -123,7 +122,6 @@ pub struct SurfaceInteraction<'a> {
     pub shape: Option<&'a Shape>,
     pub primitive: Option<&'a Primitive>,
     pub shading: Shading,
-    pub wo: Vector3f,
     pub bsdf: Option<Bsdf>,
     pub bssrdf: Option<()>,
 }
@@ -147,7 +145,7 @@ impl<'a> SurfaceInteraction<'a> {
 
         // adjust normal based on orientation & handiness
         if shape.map_or(false, |s| s.reverse_orientation() ^ s.transform_swaps_handedness()) {
-            *n *= float(-1.0);
+            n = (-*n).into();
         }
 
         let interaction = BaseInteraction::new(p, n, p_err, wo, time, None);
@@ -163,7 +161,6 @@ impl<'a> SurfaceInteraction<'a> {
 
         Self {
             interaction,
-            n,
             uv,
             dudx: float(0.0),
             dvdx: float(0.0),
@@ -177,7 +174,6 @@ impl<'a> SurfaceInteraction<'a> {
             dndv,
             shape,
             primitive,
-            wo,
             shading,
             bsdf: None,
             bssrdf: None,
@@ -224,15 +220,17 @@ impl<'a> SurfaceInteraction<'a> {
             let rx = ray.x.unwrap();
             let ry = ray.y.unwrap();
 
+            let n = self.n.unwrap();
+
             // we assume that the surface is locally flat in respect to the sampling rate
             // compute auxiliary intersection points with the surface plane
             let p = self.p.into_vector();
-            let d = (*self.n).dot(p);
+            let d = (*n).dot(p);
 
-            let tx = -((*self.n).dot(rx.origin.into_vector()) - d) / (*self.n).dot(rx.direction);
+            let tx = -((*n).dot(rx.origin.into_vector()) - d) / (*n).dot(rx.direction);
             let px = rx.origin + rx.direction * tx;
 
-            let ty = -((*self.n).dot(ry.origin.into_vector()) - d) / (*self.n).dot(ry.direction);
+            let ty = -((*n).dot(ry.origin.into_vector()) - d) / (*n).dot(ry.direction);
             let py = ry.origin + ry.direction * ty;
 
             self.dpdx = (px - p).into_vector();
@@ -241,10 +239,10 @@ impl<'a> SurfaceInteraction<'a> {
             // compute (u, v) offsets at auxiliary points
             // choose two dimensions to use for ray offset computation
             let mut dim = [Dim::X; 2];
-            if self.n.x.abs() > self.n.y.abs() && self.n.x.abs() > self.n.z.abs() {
+            if n.x.abs() > n.y.abs() && n.x.abs() > n.z.abs() {
                 dim[0] = Dim::Y;
                 dim[1] = Dim::Z;
-            } else if self.n.y.abs() > self.n.z.abs() {
+            } else if n.y.abs() > n.z.abs() {
                 dim[0] = Dim::X;
                 dim[1] = Dim::Z;
             } else {

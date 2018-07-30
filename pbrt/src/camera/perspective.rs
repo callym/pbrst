@@ -111,7 +111,7 @@ impl Camera for PerspectiveCamera {
     fn generate_ray_differential(&self, camera_sample: &CameraSample) -> (Float, RayDifferential) {
         let p_film = Point3f::new(camera_sample.film.x, camera_sample.film.y, float(0.0));
         let p_camera = self.raster_to_camera.transform_point(p_film);
-        let p_camera = p_camera.into_vector().normalize();
+        let p_camera = p_camera.into_vector();
 
         let ray = self.generate_ray_not_transformed(camera_sample);
         let mut ray = RayDifferential::from_ray(ray);
@@ -120,8 +120,8 @@ impl Camera for PerspectiveCamera {
             // todo: modify ray for DoF
             unimplemented!()
         } else {
-            ray.x = Some(RayData::new(ray.origin, p_camera + self.camera_dx));
-            ray.y = Some(RayData::new(ray.origin, p_camera + self.camera_dy));
+            ray.x = Some(RayData::new(ray.origin, (p_camera + self.camera_dx).normalize()));
+            ray.y = Some(RayData::new(ray.origin, (p_camera + self.camera_dy).normalize()));
         }
 
         let ray = self.camera_to_world.transform_ray_differential(ray.time, ray);

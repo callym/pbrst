@@ -24,21 +24,24 @@ use pbrt::spectrum::{ SpectrumType, Spectrum as PbrtSpectrum };
 use pbrt::texture::ConstantTexture;
 
 fn main() {
-    let transform = {
-        let transform = Matrix4::from_translation(Vector3f::new(
-            float(0.0),
-            float(-1.0),
-            float(0.0),
-        ));
+    let sphere = {
+        let transform = {
+            let transform = Matrix4::from_translation(Vector3f::new(
+                float(0.0),
+                float(0.0),
+                float(0.0),
+            ));
+            let rot = Matrix4::from_angle_x(Deg(float(90.0)));
 
-        Arc::new(Transform::new(transform))
+            Arc::new(Transform::new(transform * rot))
+        };
+
+        let data = ShapeData::new(transform, false);
+        let radius = float(1.0);
+
+        let sphere = Sphere::new(radius, -radius, radius, Deg(float(360.0)), data);
+        Arc::new(sphere)
     };
-
-    let data = ShapeData::new(transform, false);
-    let radius = float(1.0);
-
-    let sphere = Sphere::new(radius, -radius, radius, Deg(float(360.0)), data);
-    let sphere = Arc::new(sphere);
 
     let material = {
         let kd = ConstantTexture::new(Spectrum::from_rgb([
@@ -67,8 +70,8 @@ fn main() {
     let light = {
         let transform = Matrix4::from_translation(Vector3f::new(
             float(5.0),
-            float(3.0),
-            float(4.0),
+            float(0.0),
+            float(0.0),
         ));
         let transform = Transform::new(transform);
         let transform = Arc::new(transform);
@@ -109,7 +112,8 @@ fn main() {
             float(0.0),
             float(5.0),
         ));
-        let transform = Transform::new(transform);
+        let rot = Matrix4::from_angle_x(Deg(float(0.0)));
+        let transform = Transform::new(transform * rot);
         let transform = Arc::new(transform);
         let transform = AnimatedTransform::new(
             transform.clone(),

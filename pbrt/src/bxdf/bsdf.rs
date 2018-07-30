@@ -1,3 +1,4 @@
+use std::cmp::{ min, max };
 use std::sync::Arc;
 use cg::prelude::*;
 use prelude::*;
@@ -22,7 +23,7 @@ impl Bsdf {
         Self {
             eta,
             n_s: si.shading.n,
-            n_g: si.n,
+            n_g: si.n.unwrap(),
             ss: si.shading.dpdu.normalize(),
             ts: (*si.shading.n).cross(si.shading.dpdu.normalize()),
             bxdfs: vec![],
@@ -77,9 +78,74 @@ impl Bsdf {
         f
     }
 
-    pub fn sample_f(&self, wo: Vector3f, u: Point2f, _ty: BxdfType) -> Option<Sample> {
-        // todo - this is wrong
-        self.bxdfs[0].sample_f(wo, u)
+    pub fn sample_f(&self, wo_world: Vector3f, u: Point2f, ty: BxdfType) -> Option<Sample> {
+        let matching = self.num_components(ty);
+
+        if matching == 0 {
+            return None;
+        }
+
+        let comp = min(
+            (u[0] * float(matching)).floor().raw() as usize,
+            matching - 1,
+        );
+
+        let bxdfs = self.bxdfs.iter()
+            .filter(|b| b.ty().contains(ty))
+            .enumerate()
+            .collect::<Vec<_>>();
+        let (chosen_idx, bxdf) = bxdfs[comp];
+
+        // u[0] is no longer uniformly distributed
+        // but we can a uniformly distributed one back
+        let u_remapped = Point2f::new(
+            u[0] * float(matching) - float(comp),
+            u[1],
+        );
+
+        let wo_local = self.world_to_local(wo_world);
+        let mut sample = match bxdf.sample_f(wo_local, u_remapped) {
+            Some(sample) => sample,
+            None => return None,
+        };
+
+        if sample.pdf == 0.0 {
+            return None;
+        }
+
+        let wi_world = self.local_to_world(sample.wi);
+
+        if !bxdf.ty().contains(BxdfType::Specular) && matching > 1 {
+            for (idx, bxdf) in &bxdfs {
+                if *idx == chosen_idx {
+                    continue;
+                }
+
+                sample.pdf += bxdf.pdf(wo_local, sample.wi);
+            }
+        }
+
+        if matching > 1 {
+            sample.pdf /= float(matching);
+        }
+
+        if !bxdf.ty().contains(BxdfType::Specular) && matching > 1 {
+            let reflect = wi_world.dot(*self.n_g) * wo_world.dot(*self.n_g) > 0.0;
+
+            let mut f = Spectrum::new(0.0);
+
+            for (_, bxdf) in &bxdfs {
+                if bxdf.ty().contains(ty) &&
+                    ((reflect && bxdf.ty().contains(BxdfType::Reflection)) ||
+                     (!reflect && bxdf.ty().contains(BxdfType::Transmission))) {
+                    f += bxdf.f(wo_local, sample.wi);
+                }
+            }
+
+            sample.li = f;
+        }
+
+        Some(sample)
     }
 
     pub fn pdf(&self, wo_w: Vector3f, wi_w: Vector3f, flags: BxdfType) -> Float {
