@@ -1,4 +1,10 @@
-use prelude::*;
+#[cfg(not(feature = "double"))]
+use hexf::{ hexf32, hexf32_impl };
+
+#[cfg(feature = "double")]
+use hexf::{ hexf64, hexf64_impl };
+
+use crate::prelude::*;
 
 #[cfg(not(feature = "double"))]
 pub const ONE_MINUS_EPSILON: FloatPrim = hexf32!("0x1.fffffep-1");
@@ -13,7 +19,7 @@ mod stratified;
 pub use self::stratified::StratifiedSampler;
 
 pub trait Sampler {
-    fn create_new(&self, seed: i32) -> Box<Sampler + Send + 'static>;
+    fn create_new(&self, seed: i32) -> Box<dyn Sampler + Send + 'static>;
 
     fn samples_per_pixel(&self) -> u64;
 

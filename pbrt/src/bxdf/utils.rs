@@ -1,7 +1,7 @@
 use std::cmp::max;
-use cg::prelude::*;
+use cgmath::prelude::*;
 use num;
-use prelude::*;
+use crate::prelude::*;
 
 #[inline(always)]
 pub fn cos_theta(w: Vector3f) -> Float {

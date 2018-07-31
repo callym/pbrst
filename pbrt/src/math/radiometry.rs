@@ -1,5 +1,5 @@
 use num;
-use prelude::*;
+use crate::prelude::*;
 
 #[inline(always)]
 pub fn spherical_direction(sin: Float, cos: Float, phi: Float) -> Vector3f {

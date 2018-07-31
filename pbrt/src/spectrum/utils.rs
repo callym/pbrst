@@ -7,6 +7,7 @@ use physical_constants::{
     BOLTZMANN_CONSTANT as kb,
     WIEN_WAVELENGTH_DISPLACEMENT_LAW_CONSTANT as b,
 };
+use lazy_static::lazy_static;
 
 use super::*;
 use super::sampled::*;

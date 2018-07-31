@@ -2,27 +2,27 @@ use std::cmp;
 use std::sync::Arc;
 use rayon::prelude::*;
 
-use prelude::*;
-use camera::Camera;
-use math::*;
-use sampler::Sampler;
-use scene::Scene;
+use crate::prelude::*;
+use crate::camera::Camera;
+use crate::math::*;
+use crate::sampler::Sampler;
+use crate::scene::Scene;
 use super::Integrator;
 
 pub trait ParIntegratorData: Send {
-    fn li(&self, ray: RayDifferential, scene: &Scene, sampler: &mut Sampler, arena: &(), depth: i32) -> Spectrum;
+    fn li(&self, ray: RayDifferential, scene: &Scene, sampler: &mut dyn Sampler, arena: &(), depth: i32) -> Spectrum;
 }
 
 pub trait SamplerIntegrator: Integrator {
     type ParIntegratorData: ParIntegratorData;
 
-    fn camera(&self) -> Arc<Camera + Send + Sync>;
-    fn sampler(&self) -> &Sampler;
-    fn sampler_mut(&mut self) -> &mut Sampler;
+    fn camera(&self) -> Arc<dyn Camera + Send + Sync>;
+    fn sampler(&self) -> &dyn Sampler;
+    fn sampler_mut(&mut self) -> &mut dyn Sampler;
 
     fn par_data(&self) -> Self::ParIntegratorData;
 
-    fn preprocess(&mut self, _scene: &Scene, _sampler: &mut Sampler) {
+    fn preprocess(&mut self, _scene: &Scene, _sampler: &mut dyn Sampler) {
 
     }
 
@@ -140,7 +140,7 @@ impl<T: SamplerIntegrator> Integrator for T {
         <Self as SamplerIntegrator>::render(self, Arc::new(scene));
     }
 
-    fn preprocess(&mut self, scene: &Scene, sampler: &mut Sampler) {
+    fn preprocess(&mut self, scene: &Scene, sampler: &mut dyn Sampler) {
         <Self as SamplerIntegrator>::preprocess(self, scene, sampler);
     }
 }

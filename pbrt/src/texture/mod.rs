@@ -1,5 +1,7 @@
-use prelude::*;
-use interaction::SurfaceInteraction;
+use std::fmt::Debug;
+
+use crate::prelude::*;
+use crate::interaction::SurfaceInteraction;
 
 mod constant;
 pub use self::constant::ConstantTexture;
@@ -7,8 +9,8 @@ pub use self::constant::ConstantTexture;
 mod uv_mapping;
 pub use self::uv_mapping::UvMapping2d;
 
-pub trait Texture<T> {
-    fn evaluate(&self, si: &SurfaceInteraction) -> T;
+pub trait Texture<T>: Debug {
+    fn evaluate(&self, si: &SurfaceInteraction<'_>) -> T;
 }
 
 pub struct Mapping2d {
@@ -18,5 +20,5 @@ pub struct Mapping2d {
 }
 
 pub trait TextureMapping2d {
-    fn map(&self, si: &SurfaceInteraction) -> Mapping2d;
+    fn map(&self, si: &SurfaceInteraction<'_>) -> Mapping2d;
 }

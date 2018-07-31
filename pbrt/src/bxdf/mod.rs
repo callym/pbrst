@@ -1,8 +1,9 @@
 use std::fmt::Debug;
-use prelude::*;
-use math::*;
-use interaction::Sample;
-use sampling::utils::*;
+use bitflags::{ bitflags, __bitflags, __impl_bitflags };
+use crate::prelude::*;
+use crate::math::*;
+use crate::interaction::Sample;
+use crate::sampling::utils::*;
 
 mod bsdf;
 pub use self::bsdf::*;

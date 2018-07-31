@@ -1,7 +1,7 @@
 macro_rules! projective_camera {
-    ($screen_window:ident, $film:ident, $camera_to_screen:ident, $(,)?) => {
+    ($screen_window:ident, $film:ident, $camera_to_screen:ident, $(,)*) => {
         {
-            use cg::Matrix4;
+            use cgmath::Matrix4;
 
             let full_resolution = {
                 let film = $film.lock().unwrap();

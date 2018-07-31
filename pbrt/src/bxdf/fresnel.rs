@@ -2,7 +2,7 @@ use std::cmp::max;
 use std::fmt::Debug;
 use std::mem;
 use num;
-use prelude::*;
+use crate::prelude::*;
 
 pub trait Fresnel: Debug {
     fn evaluate(&self, cos_theta_i: Float) -> Spectrum;

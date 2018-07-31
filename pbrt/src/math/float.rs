@@ -11,21 +11,26 @@ use std::f32::consts;
 #[cfg(feature = "double")]
 use std::f64::consts;
 
-use cg::ApproxEq;
+use cgmath::ApproxEq;
+use derive_more::{
+    Add, Sub, Mul, Div, Rem,
+    AddAssign, SubAssign,
+};
 use num;
 use num::Float as NumFloat;
 use num::traits::{ Bounded, Num, One, Zero, NumCast };
 use num::traits::ParseFloatError;
+use shrinkwraprs::Shrinkwrap;
 use rand::Rng;
 use rand::distributions::{ Distribution, Standard };
 
 macro_rules! float_define {
     ($prim:ident, $noisy_ty:ident, $noisy_fn:ident) => {
         #[macro_use]
-        mod float {
+        pub mod float {
             use noisy_float::types::{ $noisy_ty, $noisy_fn };
 
-            pub const CONV: fn(FloatPrim) -> FloatNoisy = $noisy_fn;
+            pub(crate) const CONV: fn(FloatPrim) -> FloatNoisy = $noisy_fn;
             pub type FloatNoisy = $noisy_ty;
             pub type FloatPrim = $prim;
 

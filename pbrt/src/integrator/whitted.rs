@@ -1,14 +1,12 @@
 use std::sync::Arc;
-use cg::prelude::*;
-use prelude::*;
+use cgmath::prelude::*;
+use crate::prelude::*;
 
-use ::{
-    camera::Camera,
-    math::*,
-    sampler::Sampler,
-    scene::Scene,
-};
-use bxdf::{ BxdfType, TransportMode };
+use crate::camera::Camera;
+use crate::math::*;
+use crate::sampler::Sampler;
+use crate::scene::Scene;
+use crate::bxdf::{ BxdfType, TransportMode };
 use super::{ ParIntegratorData, SamplerIntegrator };
 
 pub struct WhittedParIntegratorData {
@@ -16,7 +14,7 @@ pub struct WhittedParIntegratorData {
 }
 
 impl ParIntegratorData for WhittedParIntegratorData {
-    fn li(&self, mut ray: RayDifferential, scene: &Scene, sampler: &mut Sampler, arena: &(), depth: i32) -> Spectrum {
+    fn li(&self, mut ray: RayDifferential, scene: &Scene, sampler: &mut dyn Sampler, arena: &(), depth: i32) -> Spectrum {
         let mut l = Spectrum::new(0.0);
 
         if let Some(mut isect) = scene.intersect(&mut ray) {
@@ -69,12 +67,12 @@ impl ParIntegratorData for WhittedParIntegratorData {
 
 pub struct WhittedIntegrator {
     max_depth: i32,
-    camera: Arc<Camera + Send + Sync>,
-    sampler: Box<Sampler>,
+    camera: Arc<dyn Camera + Send + Sync>,
+    sampler: Box<dyn Sampler>,
 }
 
 impl WhittedIntegrator {
-    pub fn new(max_depth: i32, camera: Arc<Camera + Send + Sync>, sampler: Box<Sampler>) -> Self {
+    pub fn new(max_depth: i32, camera: Arc<dyn Camera + Send + Sync>, sampler: Box<dyn Sampler>) -> Self {
         Self {
             max_depth,
             camera,
@@ -86,15 +84,15 @@ impl WhittedIntegrator {
 impl SamplerIntegrator for WhittedIntegrator {
     type ParIntegratorData = WhittedParIntegratorData;
 
-    fn camera(&self) -> Arc<Camera + Send + Sync> {
+    fn camera(&self) -> Arc<dyn Camera + Send + Sync> {
         self.camera.clone()
     }
 
-    fn sampler(&self) -> &Sampler {
+    fn sampler(&self) -> &dyn Sampler {
         self.sampler.as_ref()
     }
 
-    fn sampler_mut(&mut self) -> &mut Sampler {
+    fn sampler_mut(&mut self) -> &mut dyn Sampler {
         self.sampler.as_mut()
     }
 

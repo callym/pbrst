@@ -1,4 +1,4 @@
-use prelude::*;
+use crate::prelude::*;
 
 mod box_triangle;
 pub use self::box_triangle::{ BoxFilter, TriangleFilter };

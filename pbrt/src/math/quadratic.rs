@@ -1,5 +1,5 @@
 use std::mem;
-use prelude::*;
+use crate::prelude::*;
 
 pub fn quadratic(a: Efloat, b: Efloat, c: Efloat) -> Option<(Efloat, Efloat)> {
     let discrim = {

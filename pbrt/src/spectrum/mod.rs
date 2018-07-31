@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::ops::{ Deref, DerefMut, Mul, Add };
 use std::slice::{ Iter, IterMut };
 use num;
-use prelude::*;
+use crate::prelude::*;
 
 #[macro_use] mod macros;
 
@@ -69,11 +69,11 @@ pub trait Spectrum: Deref<Target = [Float]> + DerefMut {
         true
     }
 
-    fn iter(&self) -> SpectrumIter {
+    fn iter(&self) -> SpectrumIter<'_> {
         SpectrumIter(self.deref().into_iter())
     }
 
-    fn iter_mut(&mut self) -> SpectrumIterMut {
+    fn iter_mut(&mut self) -> SpectrumIterMut<'_> {
         SpectrumIterMut(self.deref_mut().into_iter())
     }
 
@@ -124,7 +124,7 @@ pub trait Spectrum: Deref<Target = [Float]> + DerefMut {
 
 pub struct SpectrumIter<'a>(Iter<'a, Float>);
 
-impl<'a> Iterator for SpectrumIter<'a> {
+impl Iterator for SpectrumIter<'a> {
     type Item = &'a Float;
 
     fn next(&mut self) -> Option<&'a Float> {
@@ -134,7 +134,7 @@ impl<'a> Iterator for SpectrumIter<'a> {
 
 pub struct SpectrumIterMut<'a>(IterMut<'a, Float>);
 
-impl<'a> Iterator for SpectrumIterMut<'a> {
+impl Iterator for SpectrumIterMut<'a> {
     type Item = &'a mut Float;
 
     fn next(&mut self) -> Option<&'a mut Float> {

@@ -1,16 +1,16 @@
 use num;
-use cg::prelude::*;
-use cg::Quaternion;
-use prelude::*;
+use cgmath::prelude::*;
+use cgmath::Quaternion;
+use crate::prelude::*;
 use super::{ Decomposed, DerivativeTerm };
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) struct TermsOfMotion {
-    pub c1: [DerivativeTerm; 3],
-    pub c2: [DerivativeTerm; 3],
-    pub c3: [DerivativeTerm; 3],
-    pub c4: [DerivativeTerm; 3],
-    pub c5: [DerivativeTerm; 3],
+    crate c1: [DerivativeTerm; 3],
+    crate c2: [DerivativeTerm; 3],
+    crate c3: [DerivativeTerm; 3],
+    crate c4: [DerivativeTerm; 3],
+    crate c5: [DerivativeTerm; 3],
 }
 
 impl TermsOfMotion {

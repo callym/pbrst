@@ -1,5 +1,5 @@
-use scene::Scene;
-use sampler::Sampler;
+use crate::scene::Scene;
+use crate::sampler::Sampler;
 
 mod sampler_integrator;
 pub use self::sampler_integrator::{ ParIntegratorData, SamplerIntegrator };
@@ -15,7 +15,7 @@ pub mod utils;
 pub trait Integrator {
     fn render(&mut self, scene: Scene);
 
-    fn preprocess(&mut self, _scene: &Scene, _sampler: &mut Sampler) {
+    fn preprocess(&mut self, _scene: &Scene, _sampler: &mut dyn Sampler) {
 
     }
 }

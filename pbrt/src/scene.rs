@@ -1,17 +1,17 @@
 use std::sync::Arc;
-use light::Light;
-use math::*;
-use primitive::Primitive;
-use interaction::SurfaceInteraction;
+use crate::light::Light;
+use crate::math::*;
+use crate::primitive::Primitive;
+use crate::interaction::SurfaceInteraction;
 
 pub struct Scene {
-    pub lights: Vec<Arc<Light + Send + Sync>>,
-    aggregate: Arc<Primitive + Send + Sync>,
+    pub lights: Vec<Arc<dyn Light + Send + Sync>>,
+    aggregate: Arc<dyn Primitive + Send + Sync>,
     world_bound: Bounds3<Float>,
 }
 
 impl Scene {
-    pub fn new(aggregate: Arc<Primitive + Send + Sync>, mut lights: Vec<Box<Light + Send + Sync>>) -> Self {
+    pub fn new(aggregate: Arc<dyn Primitive + Send + Sync>, mut lights: Vec<Box<dyn Light + Send + Sync>>) -> Self {
         let mut scene = Self {
             world_bound: aggregate.world_bound(),
             lights: vec![],
@@ -35,7 +35,7 @@ impl Scene {
         &self.world_bound
     }
 
-    pub fn intersect(&self, ray: &mut Ray) -> Option<SurfaceInteraction> {
+    pub fn intersect(&self, ray: &mut Ray) -> Option<SurfaceInteraction<'_>> {
         self.aggregate.intersect(ray)
     }
 

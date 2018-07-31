@@ -1,8 +1,8 @@
 use std::cmp::{ min, max };
 use num::traits::Zero as Zero;
-use cg::prelude::*;
-use cg::{ Point2, Point3, Vector2, Vector3 };
-use prelude::*;
+use cgmath::prelude::*;
+use cgmath::{ Point2, Point3, Vector2, Vector3 };
+use crate::prelude::*;
 
 pub trait PointExt: Sized {
     type Element;

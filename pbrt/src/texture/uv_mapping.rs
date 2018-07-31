@@ -1,6 +1,6 @@
-use prelude::*;
+use crate::prelude::*;
 use super::{ TextureMapping2d, Mapping2d };
-use interaction::SurfaceInteraction;
+use crate::interaction::SurfaceInteraction;
 
 pub struct UvMapping2d {
     pub su: Float,
@@ -10,7 +10,7 @@ pub struct UvMapping2d {
 }
 
 impl TextureMapping2d for UvMapping2d {
-    fn map(&self, si: &SurfaceInteraction) -> Mapping2d {
+    fn map(&self, si: &SurfaceInteraction<'_>) -> Mapping2d {
         let dstdx = Vector2f::new(self.su * si.dudx, self.sv * si.dvdx);
         let dstdy = Vector2f::new(self.su * si.dudy, self.sv * si.dvdy);
 

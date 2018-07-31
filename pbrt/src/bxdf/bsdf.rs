@@ -1,10 +1,10 @@
 use std::cmp::min;
 use std::sync::Arc;
-use cg::prelude::*;
-use prelude::*;
-use interaction::SurfaceInteraction;
+use cgmath::prelude::*;
+use crate::prelude::*;
+use crate::interaction::SurfaceInteraction;
 use super::{ Bxdf, BxdfType };
-use interaction::Sample;
+use crate::interaction::Sample;
 
 #[derive(Clone, Debug)]
 pub struct Bsdf {
@@ -13,11 +13,11 @@ pub struct Bsdf {
     n_g: Normal,
     ss: Vector3f,
     ts: Vector3f,
-    bxdfs: Vec<Arc<Bxdf>>,
+    bxdfs: Vec<Arc<dyn Bxdf>>,
 }
 
 impl Bsdf {
-    pub fn new(si: &SurfaceInteraction, eta: Option<Float>) -> Self {
+    pub fn new(si: &SurfaceInteraction<'_>, eta: Option<Float>) -> Self {
         let eta = eta.unwrap_or_else(|| float(1.0));
 
         Self {
@@ -30,7 +30,7 @@ impl Bsdf {
         }
     }
 
-    pub fn add(&mut self, bxdf: Arc<Bxdf>) {
+    pub fn add(&mut self, bxdf: Arc<dyn Bxdf>) {
         self.bxdfs.push(bxdf);
     }
 

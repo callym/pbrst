@@ -8,7 +8,7 @@ use std::ops::{
     Sub, SubAssign,
     Deref, DerefMut,
 };
-use prelude::*;
+use crate::prelude::*;
 
 impl Deref for $ty {
     type Target = [Float];

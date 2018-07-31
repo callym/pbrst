@@ -1,8 +1,8 @@
 use std::cmp::{ min, max };
 use num::integer::Roots as _;
-use cg::prelude::*;
-use cg::{ Point2, Point3, Vector3 };
-use prelude::*;
+use cgmath::prelude::*;
+use cgmath::{ Point2, Point3, Vector3 };
+use crate::prelude::*;
 
 pub trait VectorExt {
     type Element;

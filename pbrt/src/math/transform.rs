@@ -1,13 +1,13 @@
 use std::sync::Arc;
 use std::cmp::max;
-use cg::prelude::*;
-use cg::Matrix4;
-use cg::Matrix3;
-use cg::Quaternion;
-use cg::Transform as _;
+use cgmath::prelude::*;
+use cgmath::Matrix4;
+use cgmath::Matrix3;
+use cgmath::Quaternion;
+use cgmath::Transform as _;
 use num;
-use prelude::*;
-use interaction::SurfaceInteraction;
+use crate::prelude::*;
+use crate::interaction::SurfaceInteraction;
 use super::TermsOfMotion;
 
 type Matrix4f = Matrix4<Float>;
@@ -231,7 +231,7 @@ impl Transform {
         ret.union_p(p(bounds.max.x, bounds.max.y, bounds.max.z))
     }
 
-    pub fn transform_surface_interaction<'a>(&self, si: &SurfaceInteraction<'a>) -> SurfaceInteraction<'a> {
+    pub fn transform_surface_interaction(&self, si: &SurfaceInteraction<'a>) -> SurfaceInteraction<'a> {
         let mut ret = si.clone();
 
         let (p, p_err) = self.transform_point_with_abs_error(ret.p, ret.p_err);

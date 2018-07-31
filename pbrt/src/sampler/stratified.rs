@@ -1,7 +1,7 @@
 use std::cmp::min;
 use rand::Rng;
 use rand::distributions::{ Distribution, Uniform };
-use prelude::*;
+use crate::prelude::*;
 use super::*;
 
 pub struct StratifiedSampler {
@@ -28,7 +28,7 @@ impl StratifiedSampler {
 }
 
 impl Sampler for StratifiedSampler {
-    fn create_new(&self, seed: i32) -> Box<Sampler + Send + 'static> {
+    fn create_new(&self, seed: i32) -> Box<dyn Sampler + Send + 'static> {
         let sampler = Self::new(
             self.x_samples,
             self.y_samples,

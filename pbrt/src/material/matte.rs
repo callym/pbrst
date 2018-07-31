@@ -1,30 +1,26 @@
 use std::sync::Arc;
 use num;
-use prelude::*;
+use crate::prelude::*;
 use super::Material;
-use interaction::SurfaceInteraction;
-use bxdf::{ Bsdf, LambertianReflection, TransportMode };
-use texture::Texture;
+use crate::interaction::SurfaceInteraction;
+use crate::bxdf::{ Bsdf, LambertianReflection, TransportMode };
+use crate::texture::Texture;
 
-#[derive(Derivative)]
-#[derivative(Debug)]
+#[derive(Debug)]
 pub struct MatteMaterial {
-    #[derivative(Debug = "ignore")]
-    kd: Arc<Texture<Spectrum> + Send + Sync>,
-    #[derivative(Debug = "ignore")]
-    sigma: Arc<Texture<Float> + Send + Sync>,
-    #[derivative(Debug = "ignore")]
-    bump: Option<Arc<Texture<Float> + Send + Sync>>,
+    kd: Arc<dyn Texture<Spectrum> + Send + Sync>,
+    sigma: Arc<dyn Texture<Float> + Send + Sync>,
+    bump: Option<Arc<dyn Texture<Float> + Send + Sync>>,
 }
 
 impl MatteMaterial {
-    pub fn new(kd: Arc<Texture<Spectrum> + Send + Sync>, sigma: Arc<Texture<Float> + Send + Sync>, bump: Option<Arc<Texture<Float> + Send + Sync>>) -> Self {
+    pub fn new(kd: Arc<dyn Texture<Spectrum> + Send + Sync>, sigma: Arc<dyn Texture<Float> + Send + Sync>, bump: Option<Arc<dyn Texture<Float> + Send + Sync>>) -> Self {
         Self { kd, sigma, bump }
     }
 }
 
 impl Material for MatteMaterial {
-    fn compute_scattering_functions<'a>(&self, isect: SurfaceInteraction<'a>, _arena: &(), _mode: TransportMode, _allow_multiple_lobes: bool) -> SurfaceInteraction<'a> {
+    fn compute_scattering_functions(&self, isect: SurfaceInteraction<'a>, _arena: &(), _mode: TransportMode, _allow_multiple_lobes: bool) -> SurfaceInteraction<'a> {
         let isect = match &self.bump {
             Some(bump) => super::bump(&isect, bump),
             None => isect,

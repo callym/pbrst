@@ -1,18 +1,19 @@
 use std::cmp::min;
 use std::sync::Arc;
-use cg::prelude::*;
+use cgmath::prelude::*;
+use itertools::izip;
 
-use prelude::*;
-use bxdf::BxdfType;
-use light::Light;
-use math::*;
-use sampler::Sampler;
-use sampling::utils::*;
-use scene::Scene;
-use interaction::{ Interactions, SurfaceInteraction };
+use crate::prelude::*;
+use crate::bxdf::BxdfType;
+use crate::light::Light;
+use crate::math::*;
+use crate::sampler::Sampler;
+use crate::sampling::utils::*;
+use crate::scene::Scene;
+use crate::interaction::{ Interactions, SurfaceInteraction };
 use super::ParIntegratorData;
 
-pub fn uniform_sample_all_lights<'a>(isect: &(impl Into<Interactions<'a>> + Clone), scene: &Scene, sampler: &mut Sampler, arena: &(), n_samples: &[u32], handle_media: bool) -> Spectrum {
+pub fn uniform_sample_all_lights(isect: &(impl Into<Interactions<'a>> + Clone), scene: &Scene, sampler: &mut dyn Sampler, arena: &(), n_samples: &[u32], handle_media: bool) -> Spectrum {
     let mut l = Spectrum::new(0.0);
 
     for (light, s_i) in izip!(&*scene.lights, n_samples) {
@@ -42,7 +43,7 @@ pub fn uniform_sample_all_lights<'a>(isect: &(impl Into<Interactions<'a>> + Clon
     l
 }
 
-pub fn uniform_sample_one_light<'a>(isect: &(impl Into<Interactions<'a>> + Clone), scene: &Scene, sampler: &mut Sampler, arena: &(), handle_media: bool) -> Spectrum {
+pub fn uniform_sample_one_light(isect: &(impl Into<Interactions<'a>> + Clone), scene: &Scene, sampler: &mut dyn Sampler, arena: &(), handle_media: bool) -> Spectrum {
     // randomly choose a single light to sample
     let n_lights = scene.lights.len();
     if n_lights == 0 {
@@ -59,8 +60,8 @@ pub fn uniform_sample_one_light<'a>(isect: &(impl Into<Interactions<'a>> + Clone
 }
 
 #[cfg_attr(feature = "cargo-clippy", allow(too_many_arguments))]
-pub fn estimate_direct<'a>(isect: &(impl Into<Interactions<'a>> + Clone), u_scattering: Point2f, light: &Arc<Light + Send + Sync>, u_light: Point2f, scene: &Scene, sampler: &mut Sampler, _arena: &(), handle_media: bool, specular: bool) -> Spectrum {
-    let isect: Interactions = (*isect).clone().into();
+pub fn estimate_direct(isect: &(impl Into<Interactions<'a>> + Clone), u_scattering: Point2f, light: &Arc<dyn Light + Send + Sync>, u_light: Point2f, scene: &Scene, sampler: &mut dyn Sampler, _arena: &(), handle_media: bool, specular: bool) -> Spectrum {
+    let isect: Interactions<'_> = (*isect).clone().into();
     let flags = if specular {
         BxdfType::all()
     } else {
@@ -186,7 +187,7 @@ pub fn estimate_direct<'a>(isect: &(impl Into<Interactions<'a>> + Clone), u_scat
     ld
 }
 
-pub fn specular_reflect(integrator: &impl ParIntegratorData, ray: &RayDifferential, isect: &SurfaceInteraction, scene: &Scene, sampler: &mut Sampler, arena: &(), depth: i32) -> Spectrum {
+pub fn specular_reflect(integrator: &impl ParIntegratorData, ray: &RayDifferential, isect: &SurfaceInteraction<'_>, scene: &Scene, sampler: &mut dyn Sampler, arena: &(), depth: i32) -> Spectrum {
     // compute specular reflection direction wi and bsdf value
     let wo = isect.wo;
 
@@ -243,7 +244,7 @@ pub fn specular_reflect(integrator: &impl ParIntegratorData, ray: &RayDifferenti
     }
 }
 
-pub fn specular_transmit(integrator: &impl ParIntegratorData, ray: &RayDifferential, isect: &SurfaceInteraction, scene: &Scene, sampler: &mut Sampler, arena: &(), depth: i32) -> Spectrum {
+pub fn specular_transmit(integrator: &impl ParIntegratorData, ray: &RayDifferential, isect: &SurfaceInteraction<'_>, scene: &Scene, sampler: &mut dyn Sampler, arena: &(), depth: i32) -> Spectrum {
     // compute specular reflection direction wi and bsdf value
     let wo = isect.wo;
 

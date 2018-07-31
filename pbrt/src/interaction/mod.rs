@@ -1,5 +1,5 @@
-use prelude::*;
-use bxdf::BxdfType;
+use crate::prelude::*;
+use crate::bxdf::BxdfType;
 
 mod surface;
 pub use self::surface::*;
@@ -10,7 +10,7 @@ pub enum Interactions<'a> {
     SurfaceInteraction(SurfaceInteraction<'a>),
 }
 
-impl<'a> Interactions<'a> {
+impl Interactions<'_> {
     pub fn get_base(&self) -> &BaseInteraction {
         match self {
             Interactions::Interaction(isect) => isect,
@@ -18,7 +18,7 @@ impl<'a> Interactions<'a> {
         }
     }
 
-    pub fn get_surface(&self) -> Option<&SurfaceInteraction> {
+    pub fn get_surface(&self) -> Option<&SurfaceInteraction<'_>> {
         match self {
             Interactions::Interaction(_) => None,
             Interactions::SurfaceInteraction(isect) => Some(isect),
@@ -26,19 +26,19 @@ impl<'a> Interactions<'a> {
     }
 }
 
-impl<'a> From<BaseInteraction> for Interactions<'a> {
+impl From<BaseInteraction> for Interactions<'a> {
     fn from(si: BaseInteraction) -> Self {
         Interactions::Interaction(si)
     }
 }
 
-impl<'a> From<SurfaceInteraction<'a>> for Interactions<'a> {
+impl From<SurfaceInteraction<'a>> for Interactions<'a> {
     fn from(si: SurfaceInteraction<'a>) -> Self {
         Interactions::SurfaceInteraction(si)
     }
 }
 
-impl<'a> Into<BaseInteraction> for Interactions<'a> {
+impl Into<BaseInteraction> for Interactions<'a> {
     fn into(self) -> BaseInteraction {
         self.get_base().clone()
     }

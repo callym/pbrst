@@ -5,9 +5,9 @@ use std::ops::{ Deref, DerefMut };
 use atomic::{ Atomic, Ordering };
 use image;
 use num;
-use prelude::*;
-use filter::Filter;
-use spectrum::utils::xyz_to_rgb;
+use crate::prelude::*;
+use crate::filter::Filter;
+use crate::spectrum::utils::xyz_to_rgb;
 
 const FILTER_TABLE_WIDTH: usize = 16;
 
@@ -54,19 +54,15 @@ impl Clone for Pixel {
     }
 }
 
-#[derive(Derivative)]
-#[derivative(Debug)]
 pub struct Film {
     pub full_resolution: Point2i,
     pub cropped_pixel_bounds: Bounds2i,
     crop_window: Bounds2f,
-    #[derivative(Debug = "ignore")]
-    pub filter: Box<Filter + Send>,
+    pub filter: Box<dyn Filter + Send>,
     pub diagonal: Float,
     scale: Float,
     pub filename: String,
     pixels: Mutex<Vec<Pixel>>,
-    #[derivative(Debug = "ignore")]
     filter_table: Arc<[Float; FILTER_TABLE_WIDTH * FILTER_TABLE_WIDTH]>,
 }
 
@@ -74,7 +70,7 @@ impl Film {
     pub fn new(
         full_resolution: Point2i,
         crop_window: Bounds2f,
-        filter: Box<Filter + Send>,
+        filter: Box<dyn Filter + Send>,
         diagonal: Float,
         scale: Float,
         filename: String,

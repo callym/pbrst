@@ -1,5 +1,5 @@
 use num;
-use prelude::*;
+use crate::prelude::*;
 use super::Distribution1d;
 
 #[derive(Copy, Clone, Debug)]

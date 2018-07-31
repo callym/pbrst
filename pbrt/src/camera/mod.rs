@@ -1,7 +1,7 @@
 use std::sync::{ Arc, Mutex };
-use film::Film;
-use math::*;
-use sampler::CameraSample;
+use crate::film::Film;
+use crate::math::*;
+use crate::sampler::CameraSample;
 
 #[macro_use] mod macros;
 

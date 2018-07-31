@@ -1,7 +1,7 @@
 use std::cmp::{ min, max };
 use std::mem;
 use std::ops::*;
-use prelude::*;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Interval {

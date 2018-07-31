@@ -1,5 +1,6 @@
-use cg::prelude::*;
-use prelude::*;
+use cgmath::prelude::*;
+use shrinkwraprs::Shrinkwrap;
+use crate::prelude::*;
 
 pub fn offset_ray_origin(p: &Point3f, p_err: &Vector3f, n: &Normal, w: &Vector3f) -> Point3f {
     let d = (**n).abs().dot(*p_err);

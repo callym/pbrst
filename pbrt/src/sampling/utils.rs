@@ -1,5 +1,5 @@
 use std::cmp::max;
-use prelude::*;
+use crate::prelude::*;
 
 pub fn uniform_sample_hemisphere(u: Point2f) -> Vector3f {
     let z = u[0];

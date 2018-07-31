@@ -1,11 +1,11 @@
 use std::cmp::{ min, max };
 
-use cg::prelude::*;
-use cg::{ Rad, Deg };
+use cgmath::prelude::*;
+use cgmath::{ Rad, Deg };
 use num;
-use prelude::*;
-use math::*;
-use interaction::SurfaceInteraction;
+use crate::prelude::*;
+use crate::math::*;
+use crate::interaction::SurfaceInteraction;
 
 use super::{ Shape, ShapeData };
 
@@ -55,7 +55,7 @@ impl Shape for Sphere {
 
     #[allow(non_snake_case)]
     #[cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
-    fn intersect<'a>(&'a self, ray: &Ray, _: bool) -> Option<(Float, SurfaceInteraction<'a>)> {
+    fn intersect(&'a self, ray: &Ray, _: bool) -> Option<(Float, SurfaceInteraction<'a>)> {
         let mut phi = float(0.0);
 
         let (ray, o_err, d_err) = self.shape_data.world_to_object.transform_ray_with_error(*ray);

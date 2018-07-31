@@ -1,8 +1,8 @@
-use cg;
-use cg::Rad;
-use cg::prelude::*;
-use prelude::*;
-use math::Transform;
+use cgmath;
+use cgmath::Rad;
+use cgmath::prelude::*;
+use crate::prelude::*;
+use crate::math::Transform;
 #[macro_use] use super::*;
 
 #[allow(dead_code)]
@@ -42,7 +42,7 @@ impl PerspectiveCamera {
         };
 
         let camera_to_screen = Transform::new(
-            cg::perspective(
+            cgmath::perspective(
                 fov,
                 float(full_resolution.x as f32) / float(full_resolution.y as f32),
                 float(1e-2),

@@ -1,9 +1,9 @@
 use std::sync::Arc;
-use cg::prelude::*;
-use prelude::*;
+use cgmath::prelude::*;
+use crate::prelude::*;
 use super::{ Light, LightType, VisibilityTester };
-use interaction::{ Interactions, BaseInteraction, Sample };
-use math::Transform;
+use crate::interaction::{ Interactions, BaseInteraction, Sample };
+use crate::math::Transform;
 
 #[derive(Debug)]
 pub struct PointLight {
@@ -49,7 +49,7 @@ impl Light for PointLight {
     /// assuming there are no occluding objects between them.
     /// The `VisibilityTester` is not returned if the radiance is black,
     /// as in this case, visibility is irrelevant.
-    fn sample_li<'a>(&self, isect: &Interactions<'a>, _sample: Point2f) -> (Sample, Option<VisibilityTester>) {
+    fn sample_li(&self, isect: &Interactions<'a>, _sample: Point2f) -> (Sample, Option<VisibilityTester>) {
         let isect = isect.get_base();
 
         let wi = self.position - isect.p;

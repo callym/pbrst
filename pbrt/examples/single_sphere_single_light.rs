@@ -1,10 +1,10 @@
 #![feature(nll, underscore_imports)]
-extern crate cgmath as cg;
+extern crate cgmath;
 extern crate pbrt;
 
 use std::sync::{ Arc, Mutex };
 
-use cg::{ Deg, Matrix4 };
+use cgmath::{ Deg, Matrix4 };
 
 use pbrt::prelude::*;
 

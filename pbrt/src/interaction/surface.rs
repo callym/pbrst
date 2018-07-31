@@ -1,10 +1,11 @@
-use cg::prelude::*;
-use prelude::*;
-use math::*;
+use cgmath::prelude::*;
+use shrinkwraprs::Shrinkwrap;
 
-use bxdf::{ Bsdf, TransportMode };
-use primitive::Primitive;
-use shape::Shape;
+use crate::prelude::*;
+use crate::math::*;
+use crate::bxdf::{ Bsdf, TransportMode };
+use crate::primitive::Primitive;
+use crate::shape::Shape;
 use super::{ BaseInteraction, Shading };
 
 #[derive(Clone, Debug, Shrinkwrap)]
@@ -23,14 +24,14 @@ pub struct SurfaceInteraction<'a> {
     pub dpdv: Vector3f,
     pub dndu: Normal,
     pub dndv: Normal,
-    pub shape: Option<&'a Shape>,
-    pub primitive: Option<&'a Primitive>,
+    pub shape: Option<&'a dyn Shape>,
+    pub primitive: Option<&'a dyn Primitive>,
     pub shading: Shading,
     pub bsdf: Option<Bsdf>,
     pub bssrdf: Option<()>,
 }
 
-impl<'a> SurfaceInteraction<'a> {
+impl SurfaceInteraction<'a> {
     #[cfg_attr(feature = "cargo-clippy", allow(too_many_arguments))]
     pub fn new(
         p: Point3f,
@@ -42,8 +43,8 @@ impl<'a> SurfaceInteraction<'a> {
         dndu: Normal,
         dndv: Normal,
         time: Float,
-        shape: Option<&'a Shape>,
-        primitive: Option<&'a Primitive>,
+        shape: Option<&'a dyn Shape>,
+        primitive: Option<&'a dyn Primitive>,
     ) -> Self {
         let mut n: Normal = dpdu.cross(dpdv).normalize().into();
 

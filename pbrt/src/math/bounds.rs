@@ -1,10 +1,10 @@
 use std::cmp::{ min, max };
 use std::mem;
-use cg::prelude::*;
-use cg::{ BaseNum, Point2, Point3, Vector2, Vector3 };
+use cgmath::prelude::*;
+use cgmath::{ BaseNum, Point2, Point3, Vector2, Vector3 };
 use num::Bounded;
 
-use prelude::*;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Bounds2<T: BaseNum> {
@@ -230,7 +230,7 @@ pub struct Bounds2Iterator<'a> {
     bounds: &'a Bounds2i,
 }
 
-impl<'a> Iterator for Bounds2Iterator<'a> {
+impl Iterator for Bounds2Iterator<'a> {
     type Item = Point2i;
 
     fn next(&mut self) -> Option<Point2i> {
@@ -249,7 +249,7 @@ impl<'a> Iterator for Bounds2Iterator<'a> {
     }
 }
 
-impl<'a> IntoIterator for &'a Bounds2i {
+impl IntoIterator for &'a Bounds2i {
     type Item = Point2i;
     type IntoIter = Bounds2Iterator<'a>;
 

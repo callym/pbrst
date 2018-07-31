@@ -1,3 +1,4 @@
+use itertools::izip;
 use super::*;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

@@ -1,10 +1,11 @@
 use std::fmt::Debug;
-use prelude::*;
-use scene::Scene;
-use interaction::{ Interactions, BaseInteraction, Sample };
-use sampler::Sampler;
-use math::*;
-use math::Transform;
+use bitflags::{ bitflags, __bitflags, __impl_bitflags };
+use crate::prelude::*;
+use crate::scene::Scene;
+use crate::interaction::{ Interactions, BaseInteraction, Sample };
+use crate::sampler::Sampler;
+use crate::math::*;
+use crate::math::Transform;
 
 mod point;
 pub use self::point::PointLight;
@@ -48,7 +49,7 @@ pub trait Light: Debug {
     /// assuming there are no occluding objects between them.
     /// The `VisibilityTester` is not returned if the radiance is black,
     /// as in this case, visibility is irrelevant.
-    fn sample_li<'a>(&self, isect: &Interactions<'a>, sample: Point2f) -> (Sample, Option<VisibilityTester>);
+    fn sample_li(&self, isect: &Interactions<'a>, sample: Point2f) -> (Sample, Option<VisibilityTester>);
 
     fn power(&self) -> Spectrum;
 }
@@ -73,7 +74,7 @@ impl VisibilityTester {
         !scene.intersect_p(&self.ray())
     }
 
-    pub fn tr(&self, scene: &Scene, _sampler: &Sampler) -> Spectrum {
+    pub fn tr(&self, scene: &Scene, _sampler: &dyn Sampler) -> Spectrum {
         let mut ray = self.ray();
         let tr = Spectrum::new(1.0);
 

@@ -1,12 +1,14 @@
 use std::fmt;
 
+use itertools::izip;
+
 use super::*;
 use super::Spectrum;
 
-pub const LAMBDA_START: u32 = 400;
-pub const LAMBDA_END: u32 = 700;
+crate const LAMBDA_START: u32 = 400;
+crate const LAMBDA_END: u32 = 700;
 
-pub const NUM_SAMPLES: usize = 60;
+crate const NUM_SAMPLES: usize = 60;
 
 #[derive(Copy, Clone)]
 pub struct SampledSpectrum {
@@ -135,7 +137,7 @@ impl Spectrum for SampledSpectrum {
 }
 
 impl fmt::Debug for SampledSpectrum {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "SampledSpectrum {{ ... }}")
     }
 }

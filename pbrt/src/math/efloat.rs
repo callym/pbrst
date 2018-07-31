@@ -8,13 +8,14 @@ use std::{
         MulAssign, DivAssign, RemAssign,
     },
 };
-use cg::ApproxEq;
+use cgmath::ApproxEq;
 use noisy_float::types::{ R64, r64 };
 use num;
 use num::Float as NumFloat;
 use num::traits::{ Bounded, Num, One, Zero };
 use num::traits::ParseFloatError;
-use prelude::*;
+use shrinkwraprs::Shrinkwrap;
+use crate::prelude::*;
 
 #[derive(
     Copy, Clone, Debug,

@@ -1,9 +1,9 @@
 use std::fmt::Debug;
 use std::sync::Arc;
-use prelude::*;
-use math::*;
-use math::Transform;
-use interaction::SurfaceInteraction;
+use crate::prelude::*;
+use crate::math::*;
+use crate::math::Transform;
+use crate::interaction::SurfaceInteraction;
 
 mod cylinder;
 pub use self::cylinder::Cylinder;
@@ -54,7 +54,7 @@ pub trait Shape: Debug {
     }
 
     /// If the `Ray` intersects, returns both the distance and the `SurfaceInteraction`.
-    fn intersect<'a>(&'a self, ray: &Ray, test_alpha_texture: bool) -> Option<(Float, SurfaceInteraction<'a>)>;
+    fn intersect(&'a self, ray: &Ray, test_alpha_texture: bool) -> Option<(Float, SurfaceInteraction<'a>)>;
 
     fn intersect_p(&self, ray: &Ray, test_alpha_texture: bool) -> bool {
         self.intersect(ray, test_alpha_texture).is_some()

@@ -1,6 +1,8 @@
-use cg::prelude::*;
+use cgmath::prelude::*;
+use derive_more::{ From, Into };
+use shrinkwraprs::Shrinkwrap;
 
-use prelude::*;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, Debug, From, Into, Shrinkwrap)]
 #[shrinkwrap(mutable, unsafe_ignore_visibility)]

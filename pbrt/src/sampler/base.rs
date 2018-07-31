@@ -1,7 +1,7 @@
 use rand::Rng;
 use xoshiro::Xoroshiro128StarStar;
 
-use prelude::*;
+use crate::prelude::*;
 
 #[derive(Debug)]
 pub struct BaseSamplerData {

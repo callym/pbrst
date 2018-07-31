@@ -1,11 +1,11 @@
-use prelude::*;
+use crate::prelude::*;
 use super::*;
 use super::utils::*;
 
 #[derive(Debug)]
 pub struct SpecularReflection {
     pub r: Spectrum,
-    pub fresnel: Box<Fresnel>,
+    pub fresnel: Box<dyn Fresnel>,
 }
 
 impl Bxdf for SpecularReflection {

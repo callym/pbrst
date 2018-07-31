@@ -1,4 +1,4 @@
-use prelude::*;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Distribution1dSample {

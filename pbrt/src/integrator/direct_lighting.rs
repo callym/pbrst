@@ -1,12 +1,13 @@
 use std::sync::Arc;
-use prelude::*;
+use itertools::izip;
+use crate::prelude::*;
 use super::utils::*;
 
-use camera::Camera;
-use math::*;
-use sampler::Sampler;
-use scene::Scene;
-use bxdf::TransportMode;
+use crate::camera::Camera;
+use crate::math::*;
+use crate::sampler::Sampler;
+use crate::scene::Scene;
+use crate::bxdf::TransportMode;
 use super::{ ParIntegratorData, SamplerIntegrator };
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -22,7 +23,7 @@ pub struct DirectLightingParIntegratorData {
 }
 
 impl ParIntegratorData for DirectLightingParIntegratorData {
-    fn li(&self, mut ray: RayDifferential, scene: &Scene, sampler: &mut Sampler, arena: &(), depth: i32) -> Spectrum {
+    fn li(&self, mut ray: RayDifferential, scene: &Scene, sampler: &mut dyn Sampler, arena: &(), depth: i32) -> Spectrum {
         let mut l = Spectrum::new(0.0);
 
         if let Some(mut isect) = scene.intersect(&mut ray) {
@@ -57,13 +58,13 @@ impl ParIntegratorData for DirectLightingParIntegratorData {
 pub struct DirectLightingIntegrator {
     max_depth: i32,
     light_strategy: LightStrategy,
-    camera: Arc<Camera + Send + Sync>,
-    sampler: Box<Sampler>,
+    camera: Arc<dyn Camera + Send + Sync>,
+    sampler: Box<dyn Sampler>,
     n_light_samples: Arc<Vec<u32>>,
 }
 
 impl DirectLightingIntegrator {
-    pub fn new(max_depth: i32, light_strategy: LightStrategy, camera: Arc<Camera + Send + Sync>, sampler: Box<Sampler>) -> Self {
+    pub fn new(max_depth: i32, light_strategy: LightStrategy, camera: Arc<dyn Camera + Send + Sync>, sampler: Box<dyn Sampler>) -> Self {
         Self {
             max_depth,
             light_strategy,
@@ -77,19 +78,19 @@ impl DirectLightingIntegrator {
 impl SamplerIntegrator for DirectLightingIntegrator {
     type ParIntegratorData = DirectLightingParIntegratorData;
 
-    fn camera(&self) -> Arc<Camera + Send + Sync> {
+    fn camera(&self) -> Arc<dyn Camera + Send + Sync> {
         self.camera.clone()
     }
 
-    fn sampler(&self) -> &Sampler {
+    fn sampler(&self) -> &dyn Sampler {
         self.sampler.as_ref()
     }
 
-    fn sampler_mut(&mut self) -> &mut Sampler {
+    fn sampler_mut(&mut self) -> &mut dyn Sampler {
         self.sampler.as_mut()
     }
 
-    fn preprocess(&mut self, scene: &Scene, sampler: &mut Sampler) {
+    fn preprocess(&mut self, scene: &Scene, sampler: &mut dyn Sampler) {
         let mut n_light_samples = vec![];
         if self.light_strategy == LightStrategy::UniformSampleAll {
             // compute number of samples to use for each light
