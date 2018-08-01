@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 atomic = { version = "0.4", features = ["nightly"] }
 bitflags = "1.0"
+bitwise = { git = "https://github.com/callym/bitwise" }
 cgmath = { version = "0.16", features = ["simd", "swizzle"] }
 crossbeam = "0.3"
 derive_more = "0.11"

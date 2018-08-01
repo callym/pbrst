@@ -151,21 +151,21 @@ impl<T: BaseNum + Ord + Bounded> Bounds3<T> {
     pub fn union_p(&self, p: Point3<T>) -> Self {
         Self {
             min: Point3::new(min(self.min.x, p.x), min(self.min.y, p.y), min(self.min.z, p.z)),
-            max: Point3::new(max(self.min.x, p.x), max(self.min.y, p.y), max(self.min.z, p.z)),
+            max: Point3::new(max(self.max.x, p.x), max(self.max.y, p.y), max(self.max.z, p.z)),
         }
     }
 
     pub fn union(&self, b: Bounds3<T>) -> Self {
         Self {
             min: Point3::new(min(self.min.x, b.min.x), min(self.min.y, b.min.y), min(self.min.z, b.min.z)),
-            max: Point3::new(max(self.min.x, b.max.x), max(self.min.y, b.max.y), max(self.min.z, b.max.z)),
+            max: Point3::new(max(self.max.x, b.max.x), max(self.max.y, b.max.y), max(self.max.z, b.max.z)),
         }
     }
 
     pub fn intersect(&self, b: Bounds3<T>) -> Self {
         Self {
             min: Point3::new(max(self.min.x, b.min.x), max(self.min.y, b.min.y), max(self.min.z, b.min.z)),
-            max: Point3::new(min(self.min.x, b.max.x), min(self.min.y, b.max.y), min(self.min.z, b.max.z)),
+            max: Point3::new(min(self.max.x, b.max.x), min(self.max.y, b.max.y), min(self.max.z, b.max.z)),
         }
     }
 
@@ -212,7 +212,7 @@ impl<T: BaseNum + Ord + Bounded> Bounds3<T> {
         d.x * d.y * d.z
     }
 
-    pub fn maximum_extend(&self) -> Dim {
+    pub fn maximum_extent(&self) -> Dim {
         let d = self.diagonal();
 
         if d.x > d.y && d.x > d.z {

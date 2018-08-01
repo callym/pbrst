@@ -1,3 +1,4 @@
+use std::cmp::max;
 use std;
 use num;
 use crate::prelude::*;
@@ -125,4 +126,60 @@ pub fn find_interval(size: usize, predicate: impl Fn(usize) -> bool) -> usize {
     }
 
     num::clamp(first - 1, 0, size - 2)
+}
+
+/// this code is originally from (Mokosha's PBRT)[https://github.com/Mokosha/pbrt_rust/blob/75bae9cfbbc32d112d93c0e15841af36e550ec21/src/utils/mod.rs#L122]
+pub fn partition_by<T, B: Copy + PartialOrd>(v: &mut [T], f: impl Fn(&T) -> B) {
+    let nv = v.len();
+    if nv < 3 {
+        if nv == 2  && f(&v[1]) < f(&v[0]) {
+            v.swap(0, 1);
+        }
+        return;
+    }
+
+    let pivot = {
+        // Median of three...
+        let fst = f(&v[0]);
+        let mid = f(&v[nv / 2]);
+        let lst = f(&v[nv - 1]);
+
+        if fst < mid && mid < lst {
+            mid
+        } else if mid < fst && fst < lst {
+            fst
+        } else {
+            lst
+        }
+    };
+
+    let mut last_smaller = 0;
+    let mut num_pivots = 0;
+    for i in 0..nv {
+        let bv = f(&v[i]);
+        if bv < pivot {
+            v.swap(last_smaller + num_pivots, i);
+            v.swap(last_smaller + num_pivots, last_smaller);
+            last_smaller += 1;
+        } else if bv == pivot {
+            v.swap(last_smaller + num_pivots, i);
+            num_pivots += 1;
+        }
+    }
+    let mut pivot_idx = last_smaller;
+
+    // We can do this because if pivot_idx == 0, then all
+    // of the values are larger than the pivot...
+    pivot_idx = max(pivot_idx, 1);
+
+    let (left, right) = v.split_at_mut(pivot_idx);
+
+    debug_assert!(right.len() > 0);
+    debug_assert!(left.len() > 0);
+
+    if pivot_idx + num_pivots <= (nv / 2) {
+        partition_by(right, f);
+    } else if pivot_idx >= (nv / 2) {
+        partition_by(left, f);
+    }
 }

@@ -119,7 +119,6 @@ pub trait SamplerIntegrator: Integrator {
 
                 // merge image tile into Film
                 {
-                    println!("finished tile");
                     let film = camera.film();
                     let mut film = film.lock().unwrap();
                     film.merge_film_tile(&film_tile);

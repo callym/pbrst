@@ -14,6 +14,7 @@
 
 #![cfg_attr(feature = "cargo-clippy", warn(clippy))]
 
+pub mod aggregate;
 pub mod bxdf;
 pub mod camera;
 pub mod film;
