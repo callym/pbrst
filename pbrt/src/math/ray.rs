@@ -43,7 +43,7 @@ impl RayData {
 pub struct Ray {
     pub origin: Point3f,
     pub direction: Vector3f,
-    pub max: Option<Float>,
+    pub max: Float,
     pub time: Float,
     pub medium: Option<()>,
 }
@@ -53,7 +53,7 @@ impl Ray {
         Self {
             origin,
             direction,
-            max: None,
+            max: Float::infinity(),
             time: float(0.0),
             medium: None,
         }

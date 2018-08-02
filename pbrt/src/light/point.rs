@@ -52,7 +52,7 @@ impl Light for PointLight {
     fn sample_li(&self, isect: &Interactions<'a>, _sample: Point2f) -> (Sample, Option<VisibilityTester>) {
         let isect = isect.get_base();
 
-        let wi = self.position - isect.p;
+        let wi = (self.position - isect.p).normalize();
         let vis = VisibilityTester::new(isect.clone(), BaseInteraction {
             p: self.position,
             time: isect.time,

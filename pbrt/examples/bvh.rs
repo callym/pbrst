@@ -33,7 +33,7 @@ fn main() {
                     float(0.0),
                     float(0.0),
                 ));
-                let rot = Matrix4::from_angle_x(Deg(float(90.0)));
+                let rot = Matrix4::from_angle_x(Deg(float(60.0)));
 
                 Arc::new(Transform::new(transform * rot))
             };
@@ -41,7 +41,7 @@ fn main() {
             let data = ShapeData::new(transform, false);
             let radius = float(1.0);
 
-            let sphere = Sphere::new(radius, -radius, radius, Deg(float(360.0)), data);
+            let sphere = Sphere::new(radius, -float(0.05), float(0.05), Deg(float(360.0)), data);
             Arc::new(sphere)
         };
 
@@ -74,9 +74,9 @@ fn main() {
         let sphere = {
             let transform = {
                 let transform = Matrix4::from_translation(Vector3f::new(
-                    float(-1.5),
-                    float(1.5),
-                    float(-2.0),
+                    float(0.0),
+                    float(0.0),
+                    float(0.0),
                 ));
                 let rot = Matrix4::from_angle_x(Deg(float(90.0)));
 
@@ -115,11 +115,56 @@ fn main() {
         Arc::new(primitive)
     };
 
+    let sphere_3 = {
+        let sphere = {
+            let transform = {
+                let transform = Matrix4::from_translation(Vector3f::new(
+                    float(0.0),
+                    float(0.0),
+                    float(0.0),
+                ));
+                let rot = Matrix4::from_angle_x(Deg(float(100.0)));
+
+                Arc::new(Transform::new(transform * rot))
+            };
+
+            let data = ShapeData::new(transform, false);
+            let radius = float(0.8);
+
+            let sphere = Sphere::new(radius, -float(0.05), float(0.05), Deg(float(360.0)), data);
+            Arc::new(sphere)
+        };
+
+        let material = {
+            let kd = ConstantTexture::new(Spectrum::from_rgb([
+                    float(0.7),
+                    float(0.3),
+                    float(0.5),
+                ],
+                SpectrumType::Reflectance));
+            let kd = Arc::new(kd);
+
+            let sigma = ConstantTexture::new(0.0);
+            let sigma = Arc::new(sigma);
+
+            MatteMaterial::new(kd, sigma, None)
+        };
+        let material = Box::new(material);
+
+        let primitive = GeometricPrimitive {
+            shape: sphere,
+            material: Some(material),
+            area_light: None,
+            medium_interface: None,
+        };
+        Arc::new(primitive)
+    };
+
     let bvh = BvhAccel::new(
         vec![
             sphere_2,
             sphere,
-
+            sphere_3,
         ],
         SplitMethod::HLBVH,
     );
@@ -168,7 +213,7 @@ fn main() {
         let transform = Matrix4::from_translation(Vector3f::new(
             float(0.0),
             float(0.0),
-            float(5.0),
+            float(3.0),
         ));
         let rot = Matrix4::from_angle_x(Deg(float(0.0)));
         let transform = Transform::new(transform * rot);

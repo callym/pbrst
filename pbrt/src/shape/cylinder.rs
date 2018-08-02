@@ -75,9 +75,7 @@ impl Shape for Cylinder {
             None => return None,
         };
 
-        let max = ray.max.unwrap_or_else(Float::infinity);
-
-        if t0.upper_bound() > max || t1.lower_bound() <= 0.0 {
+        if t0.upper_bound() > ray.max || t1.lower_bound() <= 0.0 {
             return None;
         }
 
@@ -85,7 +83,7 @@ impl Shape for Cylinder {
         if shape_hit.lower_bound() <= 0.0 {
             shape_hit = t1;
 
-            if shape_hit.upper_bound() > max {
+            if shape_hit.upper_bound() > ray.max {
                 return None;
             }
         }
@@ -115,7 +113,7 @@ impl Shape for Cylinder {
 
             shape_hit = t1;
 
-            if t1.upper_bound() > max {
+            if t1.upper_bound() > ray.max {
                 return None;
             }
 

@@ -281,7 +281,6 @@ impl AddAssign for Efloat {
 impl Sub for Efloat {
     type Output = Self;
     #[inline(always)]
-    #[cfg_attr(feature = "cargo-clippy", allow(suspicious_arithmetic_impl))]
     fn sub(self, rhs: Self) -> Self {
         let mut r = efloat0(self.v - rhs.v);
 
@@ -290,7 +289,7 @@ impl Sub for Efloat {
         }
 
         r.low = next_float_down(self.lower_bound() - rhs.upper_bound()).into();
-        r.high = next_float_up(self.upper_bound() + rhs.lower_bound()).into();
+        r.high = next_float_up(self.upper_bound() - rhs.lower_bound()).into();
 
         r.check();
 

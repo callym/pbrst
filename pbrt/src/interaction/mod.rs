@@ -85,7 +85,7 @@ impl BaseInteraction {
         let d = p - o;
 
         let mut ray = Ray::new(o, d);
-        ray.max = Some(float(1.0 - SHADOW_EPSILON));
+        ray.max = float(1.0 - SHADOW_EPSILON);
         ray.time = self.time;
         // todo: ray.medium = GetMedium(d);
         ray

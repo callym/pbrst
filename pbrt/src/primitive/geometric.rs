@@ -18,7 +18,7 @@ pub struct GeometricPrimitive {
 impl Primitive for GeometricPrimitive {
     fn intersect(&'a self, ray: &mut Ray) -> Option<SurfaceInteraction<'a>> {
         if let Some((hit, mut isect)) = self.shape.intersect(ray, true) {
-            ray.max = Some(hit);
+            ray.max = hit;
             isect.primitive = Some(self);
 
             // Initialize mediumInterface

@@ -1,6 +1,7 @@
 use std::{
     self,
     cmp::{ PartialEq, PartialOrd, Ordering },
+    fmt::{ self, Debug },
     num::FpCategory,
     ops::{ Mul, Div, Rem, Neg, MulAssign, DivAssign, RemAssign },
 };
@@ -60,13 +61,19 @@ pub fn float(f: impl NumCast) -> Float {
 }
 
 #[derive(
-    Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd,
+    Copy, Clone, Eq, PartialEq, Ord, PartialOrd,
     Add, Sub, Mul, Div, Rem,
     AddAssign, SubAssign,
     Shrinkwrap
 )]
 #[shrinkwrap(mutable, unsafe_ignore_visibility)]
 pub struct Float(FloatNoisy);
+
+impl Debug for Float {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        <FloatPrim as Debug>::fmt(&self.raw(), f)
+    }
+}
 
 impl Float {
     float_const!(pi, PI);

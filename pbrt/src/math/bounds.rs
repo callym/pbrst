@@ -306,7 +306,7 @@ impl Bounds3f {
 
     pub fn intersect_p(&self, ray: Ray) -> Option<(Option<Float>, Option<Float>)> {
         let mut t0 = float(0.0);
-        let mut t1 = ray.max.unwrap_or_else(Float::infinity);
+        let mut t1 = ray.max;
 
         let hit_t0: Option<Float> = None;
         let hit_t1: Option<Float> = None;
@@ -339,21 +339,16 @@ impl Bounds3f {
     }
 
     pub fn intersect_p_precomputed(&self, ray: Ray, inv_dir: Vector3f, dir_is_negative: [bool; 3]) -> bool {
-        let max = ray.max.unwrap_or_else(Float::infinity);
-
         let is_neg = |neg: bool| if neg { self.max } else { self.min };
         let mut tx_min = (is_neg(dir_is_negative[0]).x - ray.origin.x) * inv_dir.x;
         let mut tx_max = (is_neg(!dir_is_negative[0]).x - ray.origin.x) * inv_dir.x;
         let ty_min = (is_neg(dir_is_negative[1]).y - ray.origin.y) * inv_dir.y;
         let mut ty_max = (is_neg(!dir_is_negative[1]).y - ray.origin.y) * inv_dir.y;
-        let tz_min = (is_neg(dir_is_negative[2]).z - ray.origin.z) * inv_dir.z;
-        let mut tz_max = (is_neg(!dir_is_negative[2]).z - ray.origin.z) * inv_dir.z;
 
         tx_max  *= float(1.0 + 2.0 * gamma(3));
         ty_max  *= float(1.0 + 2.0 * gamma(3));
-        tz_max  *= float(1.0 + 2.0 * gamma(3));
 
-        if tx_min  > ty_max || ty_min > tx_max || tx_min > tx_max || tz_min > ty_max {
+        if tx_min  > ty_max || ty_min > tx_max {
             return false;
         }
 
@@ -365,6 +360,14 @@ impl Bounds3f {
             tx_max = ty_max;
         }
 
+        let tz_min = (is_neg(dir_is_negative[2]).z - ray.origin.z) * inv_dir.z;
+        let mut tz_max = (is_neg(!dir_is_negative[2]).z - ray.origin.z) * inv_dir.z;
+        tz_max  *= float(1.0 + 2.0 * gamma(3));
+
+        if tx_min > tz_max || tz_min > tx_max {
+            return false;
+        }
+
         if tz_min > tx_min {
             tx_min = tz_min;
         }
@@ -373,6 +376,6 @@ impl Bounds3f {
             tx_max = tz_max;
         }
 
-        tx_min < max && tx_max > 0.0
+        (tx_min < ray.max) && (tx_max > 0.0)
     }
 }

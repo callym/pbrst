@@ -172,13 +172,12 @@ impl Transform {
         ray.direction = direction;
 
         let length_squared = ray.direction.length_squared();
-        let max = ray.max.unwrap_or_else(Float::infinity);
 
         if length_squared > 0.0 {
             let dir = ray.direction;
             let dt = dir.abs().dot(o_err) / length_squared;
             ray.origin += dir * dt;
-            ray.max = Some(max - dt);
+            ray.max -= dt;
         }
 
         ray
@@ -192,13 +191,12 @@ impl Transform {
         ray.direction = direction;
 
         let length_squared = ray.direction.length_squared();
-        let max = ray.max.unwrap_or_else(Float::infinity);
 
         if length_squared > 0.0 {
             let dir = ray.direction;
             let dt = dir.abs().dot(o_err) / length_squared;
             ray.origin += dir * dt;
-            ray.max = Some(max - dt);
+            ray.max -= dt;
         }
 
         (ray, o_err, d_err)
