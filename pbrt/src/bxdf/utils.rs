@@ -52,7 +52,7 @@ pub fn cos_phi(w: Vector3f) -> Float {
 pub fn sin_phi(w: Vector3f) -> Float {
     let sin_theta = sin_theta(w);
     if sin_theta == 0.0 {
-        float(1.0)
+        float(0.0)
     } else {
         num::clamp(w.y / sin_theta, float(-1.0), float(1.0))
     }
@@ -80,8 +80,7 @@ pub fn cos_delta_phi(wa: Vector3f, wb: Vector3f) -> Float {
 
 #[inline(always)]
 pub fn reflect(wo: Vector3f, n: Vector3f) -> Vector3f {
-    let Vector3f { x, y, z } = -wo.add_element_wise(float(2.0)) * wo.dot(n);
-    Vector3f::new(x * n.x, y * n.y, z * n.z)
+    -wo + n * float(2.0) * wo.dot(n)
 }
 
 /// This function calculates the refracted `Vector3f`, and returns `None` if
@@ -97,10 +96,9 @@ pub fn refract(wi: Vector3f, n: Normal, eta: Float) -> Option<Vector3f> {
     }
 
     let cos_theta_t = (float(1.0) - sin_2_theta_t).sqrt();
+    let wt = -wi * eta + (*n) * (eta * cos_theta_i - cos_theta_t);
 
-    let Vector3f { x, y, z } = (-wi * eta).add_element_wise(eta * cos_theta_i - cos_theta_t);
-
-    Some(Vector3f::new(x * n.x, y * n.y, z * n.z))
+    Some(wt)
 }
 
 #[inline(always)]

@@ -144,26 +144,6 @@ impl Transform {
         }
     }
 
-    pub fn transform_ray_data_with_error(&self, ray: RayData) -> (RayData, Vector3f, Vector3f) {
-        let (mut origin, o_err) = self.transform_point_with_error(ray.origin);
-        let (direction, d_err) = self.transform_vector_with_error(ray.direction);
-
-        let length_squared = ray.direction.length_squared();
-
-        if length_squared > 0.0 {
-            let dir = direction;
-            let dt = dir.abs().dot(o_err) / length_squared;
-            origin += dir * dt;
-        }
-
-        (RayData {
-            origin,
-            direction,
-        },
-        o_err,
-        d_err)
-    }
-
     pub fn transform_ray(&self, mut ray: Ray) -> Ray {
         let (origin, o_err) = self.transform_point_with_error(ray.origin);
         let direction = self.transform_vector(ray.direction);
@@ -209,10 +189,6 @@ impl Transform {
         ray
     }
 
-    pub fn transform_ray_differential_with_error(&self, _: RayDifferential, _: Vector3f, _: Vector3f) -> (RayDifferential, Vector3f, Vector3f) {
-        unimplemented!()
-    }
-
     // todo - this can be more efficient
     pub fn transform_bounds(&self, bounds: Bounds3f) -> Bounds3f {
         let p = |x, y, z| self.transform_point(Point3f::new(x, y, z));
@@ -233,10 +209,10 @@ impl Transform {
         let mut ret = si.clone();
 
         let (p, p_err) = self.transform_point_with_abs_error(ret.p, ret.p_err);
-        ret.p = p;
-        ret.p_err = p_err;
+        ret.interaction.p = p;
+        ret.interaction.p_err = p_err;
 
-        ret.n = Some(self.transform_normal(ret.n.unwrap()).normalize());
+        ret.interaction.n = Some(self.transform_normal(ret.n.unwrap()).normalize());
         ret.interaction.wo = self.transform_vector(ret.interaction.wo).normalize();
 
         ret.dpdu = self.transform_vector(ret.dpdu);
@@ -254,6 +230,8 @@ impl Transform {
         ret.dpdy = self.transform_vector(ret.dpdy);
 
         ret.shading.n = ret.shading.n.face_forward(ret.n.unwrap());
+
+        assert!(ret.n.unwrap().dot(ret.shading.n) > 0.0);
 
         ret
     }

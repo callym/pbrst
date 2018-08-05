@@ -3,3 +3,7 @@ members = [
     "pbrt",
     "pbrt-proc",
 ]
+
+[profile.dev]
+opt-level = 3
+codegen-units = 8

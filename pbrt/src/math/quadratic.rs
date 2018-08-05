@@ -6,7 +6,7 @@ pub fn quadratic(a: Efloat, b: Efloat, c: Efloat) -> Option<(Efloat, Efloat)> {
         let a = f64::from(a.raw());
         let b = f64::from(b.raw());
         let c = f64::from(c.raw());
-        b * b - 4.0 * a * c
+        b.powi(2) - 4.0 * a * c
     };
 
     if discrim < 0.0 {
@@ -25,6 +25,8 @@ pub fn quadratic(a: Efloat, b: Efloat, c: Efloat) -> Option<(Efloat, Efloat)> {
         if t0 > t1 {
             mem::swap(&mut t0, &mut t1);
         }
+
+        debug_assert!(t0 < t1);
 
         Some((t0, t1))
     }

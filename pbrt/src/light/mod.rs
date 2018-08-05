@@ -54,6 +54,7 @@ pub trait Light: Debug {
     fn power(&self) -> Spectrum;
 }
 
+#[derive(Debug)]
 pub struct VisibilityTester {
     pub p0: BaseInteraction,
     pub p1: BaseInteraction,
@@ -66,7 +67,7 @@ impl VisibilityTester {
 
     #[inline(always)]
     fn ray(&self) -> Ray {
-        self.p0.spawn_ray_to(&self.p1.p)
+        self.p0.spawn_ray_to(self.p1.clone())
     }
 
     #[inline(always)]
@@ -99,7 +100,7 @@ impl VisibilityTester {
             // else - we've hit an invisible surface, so start
             // tracing again from that surface -> p1
             match &isect {
-                Some(isect) => ray = isect.spawn_ray_to(&self.p1.p),
+                Some(isect) => ray = isect.spawn_ray_to(self.p1.clone()),
                 None => break,
             }
         }

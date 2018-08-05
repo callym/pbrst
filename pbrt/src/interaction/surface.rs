@@ -91,11 +91,11 @@ impl SurfaceInteraction<'a> {
 
         // adjust normal based on orientation & handiness
         if self.shape.as_ref().map_or(false, |s| s.reverse_orientation() ^ s.transform_swaps_handedness()) {
-            *n *= float(-1.0);
+            *n = (-*n).into();
         }
 
         if orientation_is_authoritative {
-            self.shading.n = n.face_forward(self.shading.n);
+            self.n = Some(n.face_forward(self.shading.n));
         } else {
             self.shading.n = self.shading.n.face_forward(n);
         }

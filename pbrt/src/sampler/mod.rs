@@ -60,4 +60,3 @@ pub struct CameraSample {
     pub film: Point2f,
     pub time: Float,
 }
-

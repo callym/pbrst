@@ -313,7 +313,7 @@ impl NumFloat for Float {
 
     #[inline(always)]
     fn neg_zero() -> Self {
-        float(FloatPrim::zero())
+        float(FloatPrim::neg_zero())
     }
 
     #[inline(always)]

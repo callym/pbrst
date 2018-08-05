@@ -14,7 +14,5 @@ pub use self::perspective::PerspectiveCamera;
 pub trait Camera {
     fn film(&self) -> Arc<Mutex<Film>>;
 
-    fn generate_ray(&self, camera_sample: &CameraSample) -> (Float, Ray);
-
     fn generate_ray_differential(&self, camera_sample: &CameraSample) -> (Float, RayDifferential);
 }

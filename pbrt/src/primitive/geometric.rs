@@ -20,6 +20,7 @@ impl Primitive for GeometricPrimitive {
         if let Some((hit, mut isect)) = self.shape.intersect(ray, true) {
             ray.max = hit;
             isect.primitive = Some(self);
+            isect.shape = Some(&*self.shape);
 
             // Initialize mediumInterface
 

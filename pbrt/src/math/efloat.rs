@@ -358,8 +358,8 @@ impl Div for Efloat {
                 self.upper_bound() / rhs.upper_bound(),
             ];
 
-            r.low = *prod.iter().min().unwrap();
-            r.high = *prod.iter().max().unwrap();
+            r.low = next_float_down_f(*prod.iter().min().unwrap());
+            r.high = next_float_up_f(*prod.iter().max().unwrap());
         }
 
         r.check();

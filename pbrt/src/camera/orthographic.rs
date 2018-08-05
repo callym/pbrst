@@ -58,21 +58,6 @@ impl OrthographicCamera {
             medium,
         }
     }
-
-    fn generate_ray_not_transformed(&self, camera_sample: &CameraSample) -> Ray {
-        // compute raster and cam sam pos
-        let p_film = Point3f::new(camera_sample.film.x, camera_sample.film.y, float(0.0));
-        let p_camera = self.raster_to_camera.transform_point(p_film);
-
-        let mut ray = Ray::new(p_camera, Vector3f::new(float(0.0), float(0.0), float(1.0)));
-
-        // todo: modify ray for DoF
-
-        ray.time = self.shutter_open.lerp(self.shutter_close, camera_sample.time);
-        ray.medium = self.medium;
-
-        ray
-    }
 }
 
 impl Camera for OrthographicCamera {
@@ -80,15 +65,16 @@ impl Camera for OrthographicCamera {
         self.film.clone()
     }
 
-    fn generate_ray(&self, camera_sample: &CameraSample) -> (Float, Ray) {
-        let ray = self.generate_ray_not_transformed(camera_sample);
-        let ray = self.camera_to_world.transform_ray(ray.time, ray);
-
-        (float(1.0), ray)
-    }
-
     fn generate_ray_differential(&self, camera_sample: &CameraSample) -> (Float, RayDifferential) {
-        let ray = self.generate_ray_not_transformed(camera_sample);
+        // compute raster and cam sam pos
+        let p_film = Point3f::new(camera_sample.film.x, camera_sample.film.y, float(0.0));
+        let p_camera = self.raster_to_camera.transform_point(p_film);
+
+        let mut ray = Ray::new(p_camera, Vector3f::new(float(0.0), float(0.0), float(1.0)));
+
+        ray.time = self.shutter_open.lerp(self.shutter_close, camera_sample.time);
+        ray.medium = self.medium;
+
         let mut ray = RayDifferential::from_ray(ray);
 
         if self.lens_radius > 0.0 {

@@ -83,7 +83,7 @@ pub fn next_float_down(v: impl Into<f32>) -> f32 {
     }
 
     let mut ui = f32_to_bits(v);
-    if v >= 0.0 {
+    if v > 0.0 {
         ui -= 1;
     } else {
         ui += 1;
@@ -174,8 +174,8 @@ pub fn partition_by<T, B: Copy + PartialOrd>(v: &mut [T], f: impl Fn(&T) -> B) {
 
     let (left, right) = v.split_at_mut(pivot_idx);
 
-    debug_assert!(right.len() > 0);
-    debug_assert!(left.len() > 0);
+    debug_assert!(!right.is_empty());
+    debug_assert!(!left.is_empty());
 
     if pivot_idx + num_pivots <= (nv / 2) {
         partition_by(right, f);

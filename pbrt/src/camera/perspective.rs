@@ -1,4 +1,5 @@
 use cgmath;
+use cgmath::{ Matrix4, Vector4 };
 use cgmath::Rad;
 use cgmath::prelude::*;
 use crate::prelude::*;
@@ -41,12 +42,12 @@ impl PerspectiveCamera {
             film.full_resolution
         };
 
-        let camera_to_screen = Transform::new(
-            cgmath::perspective(
-                fov,
-                float(full_resolution.x as f32) / float(full_resolution.y as f32),
-                float(1e-2),
-                float(1000.0)));
+        let camera_to_screen = cgmath::perspective(
+            fov,
+            float(full_resolution.x as f32) / float(full_resolution.y as f32),
+            float(5e-3),
+            float(1000.0));
+        let camera_to_screen = Transform::new(camera_to_screen);
 
         let (screen_to_raster, raster_to_camera) = projective_camera!(
             screen_window,
@@ -79,21 +80,6 @@ impl PerspectiveCamera {
             medium,
         }
     }
-
-    fn generate_ray_not_transformed(&self, camera_sample: &CameraSample) -> Ray {
-        // compute raster and cam sam pos
-        let p_film = Point3f::new(camera_sample.film.x, camera_sample.film.y, float(0.0));
-        let p_camera = self.raster_to_camera.transform_point(p_film);
-
-        let mut ray = Ray::new(Point3f::zero(), p_camera.into_vector().normalize());
-
-        // todo: modify ray for DoF
-
-        ray.time = self.shutter_open.lerp(self.shutter_close, camera_sample.time);
-        ray.medium = self.medium;
-
-        ray
-    }
 }
 
 impl Camera for PerspectiveCamera {
@@ -101,27 +87,38 @@ impl Camera for PerspectiveCamera {
         self.film.clone()
     }
 
-    fn generate_ray(&self, camera_sample: &CameraSample) -> (Float, Ray) {
-        let ray = self.generate_ray_not_transformed(camera_sample);
-        let ray = self.camera_to_world.transform_ray(ray.time, ray);
-
-        (float(1.0), ray)
-    }
-
     fn generate_ray_differential(&self, camera_sample: &CameraSample) -> (Float, RayDifferential) {
         let p_film = Point3f::new(camera_sample.film.x, camera_sample.film.y, float(0.0));
         let p_camera = self.raster_to_camera.transform_point(p_film);
         let p_camera = p_camera.into_vector();
 
-        let ray = self.generate_ray_not_transformed(camera_sample);
-        let mut ray = RayDifferential::from_ray(ray);
+        let dir = p_camera.normalize();
+
+        let ray_x = RayData::new(
+            Point3f::zero(),
+            (dir + self.camera_dx).normalize(),
+        );
+
+        let ray_y = RayData::new(
+            Point3f::zero(),
+            (dir + self.camera_dy).normalize(),
+        );
+
+        let ray = RayDifferential {
+            ray: Ray {
+                origin: Point3f::zero(),
+                direction: dir,
+                max: Float::infinity(),
+                time: camera_sample.time.lerp(self.shutter_open, self.shutter_close),
+                medium: None,
+            },
+            x: Some(ray_x),
+            y: Some(ray_y),
+        };
 
         if self.lens_radius > 0.0 {
             // todo: modify ray for DoF
             unimplemented!()
-        } else {
-            ray.x = Some(RayData::new(ray.origin, (p_camera + self.camera_dx).normalize()));
-            ray.y = Some(RayData::new(ray.origin, (p_camera + self.camera_dy).normalize()));
         }
 
         let ray = self.camera_to_world.transform_ray_differential(ray.time, ray);

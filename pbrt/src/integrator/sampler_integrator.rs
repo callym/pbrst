@@ -104,8 +104,8 @@ pub trait SamplerIntegrator: Integrator {
                             };
 
                             // if l is negative or infinite
-                            if l.y() < -1e-5 || l.y().is_infinite() {
-                                l = Spectrum::new(0.0);
+                            if l.y() < -10e-5 || l.y().is_infinite() {
+                                //l = Spectrum::new(0.0);
                             }
 
                             // add camera ray's contribution to image

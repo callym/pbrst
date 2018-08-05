@@ -106,6 +106,8 @@ impl SamplerIntegrator for DirectLightingIntegrator {
                 }
             }
         }
+
+        self.n_light_samples = Arc::new(n_light_samples);
     }
 
     fn par_data(&self) -> Self::ParIntegratorData {

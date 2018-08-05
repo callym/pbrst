@@ -6,7 +6,7 @@ use crate::interaction::SurfaceInteraction;
 use crate::bxdf::{ Bsdf, LambertianReflection, TransportMode };
 use crate::texture::Texture;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct MatteMaterial {
     kd: Arc<dyn Texture<Spectrum> + Send + Sync>,
     sigma: Arc<dyn Texture<Float> + Send + Sync>,
@@ -29,9 +29,8 @@ impl Material for MatteMaterial {
         let mut isect = isect.clone();
         let mut bsdf = Bsdf::new(&isect, None);
 
-
         let r = self.kd.evaluate(&isect).clamp(None, None);
-        let sig = num::clamp(self.sigma.evaluate(&isect), float(0.0), float(1.0));
+        let sig = num::clamp(self.sigma.evaluate(&isect), float(0.0), float(90.0));
 
         if !r.is_black() {
             if sig == 0.0 {

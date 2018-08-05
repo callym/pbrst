@@ -1,7 +1,8 @@
-use std::cmp::min;
+use std::cmp::{ min, max };
 use std::sync::Arc;
 use cgmath::prelude::*;
 use itertools::izip;
+use num;
 
 use crate::prelude::*;
 use crate::bxdf::BxdfType;
@@ -33,7 +34,7 @@ pub fn uniform_sample_all_lights(isect: &(impl Into<Interactions<'a>> + Clone), 
             let mut ld = Spectrum::new(0.0);
 
             for (u_light, u_scattering) in izip!(light_arr, scattering_arr) {
-                ld +=estimate_direct(isect, u_scattering, light, u_light, scene, sampler, arena, handle_media, false);
+                ld += estimate_direct(isect, u_scattering, light, u_light, scene, sampler, arena, handle_media, false);
             }
 
             l += ld / float(*s_i);
@@ -56,7 +57,7 @@ pub fn uniform_sample_one_light(isect: &(impl Into<Interactions<'a>> + Clone), s
     let u_light = sampler.get_2d();
     let u_scattering = sampler.get_2d();
 
-    estimate_direct(isect, u_scattering, light, u_light, scene, sampler, arena, handle_media, false) * float(n_lights)
+    estimate_direct(isect, u_scattering, light, u_light, scene, sampler, arena, handle_media, false) / float(n_lights)
 }
 
 #[cfg_attr(feature = "cargo-clippy", allow(too_many_arguments))]
@@ -103,15 +104,15 @@ pub fn estimate_direct(isect: &(impl Into<Interactions<'a>> + Clone), u_scatteri
             } else if !vis.unoccluded(scene) {
                 light_sample.li = Spectrum::new(0.0)
             }
+        }
 
+        if !light_sample.li.is_black() {
             // add light's contribution to reflected radiance
-            if !light_sample.li.is_black() {
-                if light.is_delta_light() {
-                    ld += f * light_sample.li / light_sample.pdf;
-                } else {
-                    let weight = power_heuristic(1, light_sample.pdf, 1, scattering_pdf);
-                    ld += f * light_sample.li * weight * light_sample.pdf;
-                }
+            if light.is_delta_light() {
+                ld += f * light_sample.li / light_sample.pdf;
+            } else {
+                let weight = power_heuristic(1, light_sample.pdf, 1, scattering_pdf);
+                ld += f * light_sample.li * weight / light_sample.pdf;
             }
         }
     }
@@ -131,6 +132,7 @@ pub fn estimate_direct(isect: &(impl Into<Interactions<'a>> + Clone), u_scatteri
                 if let Some(sample) = bsdf.sample_f(isect.wo, u_scattering, flags) {
                     f = sample.li * sample.wi.dot(*isect.shading.n).abs();
                     sampled_specular = sample.ty.map_or(false, |ty| ty.contains(BxdfType::Specular));
+                    scattering_pdf = sample.pdf;
                 }
             }
         } else {
@@ -141,6 +143,7 @@ pub fn estimate_direct(isect: &(impl Into<Interactions<'a>> + Clone), u_scatteri
             // account for light contributions along wi
             let weight = if !sampled_specular {
                 //let light_pdf = light.pdf_li(isect, light_sample.wi);
+                // todo - for point lights this is 0.0
                 let light_pdf = float(0.0);
                 if light_pdf == 0.0 {
                     return ld;
@@ -228,8 +231,8 @@ pub fn specular_reflect(integrator: &impl ParIntegratorData, ray: &RayDifferenti
             let ddndx = dwodx.dot(*ns) + wo.dot(dndx);
             let ddndy = dwody.dot(*ns) + wo.dot(dndy);
 
-            let rx_d = f.wi - dwodx + (dndx * wo.dot(*ns) +  *ns * ddndx * float(2.0));
-            let ry_d = f.wi - dwody + (dndy * wo.dot(*ns) +  *ns * ddndy * float(2.0));
+            let rx_d = f.wi - dwodx + (dndx * wo.dot(*ns) + (*ns) * ddndx * float(2.0));
+            let ry_d = f.wi - dwody + (dndy * wo.dot(*ns) + (*ns) * ddndy * float(2.0));
 
             let rx = RayData::new(rx_o, rx_d);
             let ry = RayData::new(ry_o, ry_d);
@@ -296,8 +299,8 @@ pub fn specular_transmit(integrator: &impl ParIntegratorData, ray: &RayDifferent
             let dmudx = (eta - (eta.powi(2) * w.dot(*ns)) / f.wi.dot(*ns)) * ddndx;
             let dmudy = (eta - (eta.powi(2) * w.dot(*ns)) / f.wi.dot(*ns)) * ddndy;
 
-            let rx_d = f.wi + dwodx * eta - (dndx * mu + *ns * dmudx);
-            let ry_d = f.wi + dwody * eta - (dndy * mu + *ns * dmudy);
+            let rx_d = f.wi + dwodx * eta - (dndx * mu + (*ns) * dmudx);
+            let ry_d = f.wi + dwody * eta - (dndy * mu + (*ns) * dmudy);
 
             let rx = RayData::new(rx_o, rx_d);
             let ry = RayData::new(ry_o, ry_d);

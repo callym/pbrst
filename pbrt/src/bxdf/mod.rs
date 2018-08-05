@@ -44,12 +44,15 @@ pub trait Bxdf: Debug {
 
     fn sample_f(&self, wo: Vector3f, u: Point2f) -> Option<Sample> {
         let mut wi = cosine_sample_hemisphere(u);
+
         if wo.z < 0.0 {
             wi.z *= float(-1.0);
         }
 
         let pdf = self.pdf(wo, wi);
         let f = self.f(wo, wi);
+
+        assert!(pdf > 0.0);
 
         Some(Sample {
             wi,
@@ -92,6 +95,10 @@ impl<B: Bxdf> Bxdf for ScaledBxdf<B> {
         } else {
             None
         }
+    }
+
+    fn pdf(&self, wo: Vector3f, wi: Vector3f) -> Float {
+        self.bxdf.pdf(wo, wi)
     }
 
     fn rho(&self, wo: Option<Vector3f>, n_samples: i32, samples: &[Point2f]) -> Spectrum {

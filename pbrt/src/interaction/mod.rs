@@ -1,3 +1,4 @@
+use cgmath::prelude::*;
 use crate::prelude::*;
 use crate::bxdf::BxdfType;
 
@@ -56,6 +57,8 @@ pub struct BaseInteraction {
 
 impl BaseInteraction {
     pub fn new(p: Point3f, n: Normal, p_err: Vector3f, wo: Vector3f, time: Float, medium: Option<()>) -> Self {
+        let wo = wo.normalize();
+
         Self {
             p,
             time,
@@ -67,7 +70,7 @@ impl BaseInteraction {
     }
 
     pub fn is_surface_interaction(&self) -> bool {
-        self.n.is_some()
+        self.n.map_or(false, |n| n != Normal::zero())
     }
 
     pub fn spawn_ray(&self, dir: &Vector3f) -> Ray {
@@ -79,10 +82,12 @@ impl BaseInteraction {
         ray
     }
 
-    pub fn spawn_ray_to(&self, p: &Point3f) -> Ray {
+    pub fn spawn_ray_to(&self, p: impl Into<BaseInteraction>) -> Ray {
+        let p: BaseInteraction = p.into();
         let n = self.n.unwrap_or_else(Normal::zero);
-        let o = offset_ray_origin(&self.p, &self.p_err, &n, &(p - self.p));
-        let d = p - o;
+        let o = offset_ray_origin(&self.p, &self.p_err, &n, &(p.p - self.p));
+        let target: Point3f = offset_ray_origin(&p.p, &p.p_err, &p.n.unwrap_or_else(Normal::zero), &(o - p.p));
+        let d = target - o;
 
         let mut ray = Ray::new(o, d);
         ray.max = float(1.0 - SHADOW_EPSILON);

@@ -113,7 +113,7 @@ pub struct BvhAccel {
 
 impl BvhAccel {
     pub fn new(mut primitives: Vec<Arc<dyn Primitive + Send>>, split_method: SplitMethod) -> Self {
-        assert!(primitives.len() > 0);
+        assert!(!primitives.is_empty());
 
         // build BVH from primitives
         // init primitive_info array
@@ -661,7 +661,7 @@ fn recursive_build(primitives: &'a [Arc<dyn Primitive + Send>], primitive_info: 
                     partition_by(&mut primitive_info, |p| p.centroid[dim as usize]);
                 },
                 SplitMethod::SAH => {
-                    if n_primitives <= 4 {
+                    if n_primitives <= 2 {
                         // splitting small amounts using SAH isn't worth the cost
                         // so just use `EqualCounts`
                         partition_by(&mut primitive_info, |p| p.centroid[dim as usize]);
@@ -698,7 +698,7 @@ fn recursive_build(primitives: &'a [Arc<dyn Primitive + Send>], primitive_info: 
                         // because the virtual dispatch used for intersections
                         // intersection cost is set to 1 for ease of calculations
                         // Ray -> Aggregate -> Shape -> Primitive
-                        let traversal_cost = float(0.125);
+                        let traversal_cost = float(1.0);
                         let mut cost = [float(0.0); N_BUCKETS - 1];
                         for i in 0..(N_BUCKETS - 1) {
                             let mut b0 = Bounds3f::empty();

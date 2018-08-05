@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use crate::prelude::*;
 use crate::light::Light;
 use crate::math::*;
 use crate::primitive::Primitive;
@@ -36,6 +37,7 @@ impl Scene {
     }
 
     pub fn intersect(&self, ray: &mut Ray) -> Option<SurfaceInteraction<'_>> {
+        assert_ne!(ray.direction, Vector3f::new(float(0), float(0), float(0)));
         self.aggregate.intersect(ray)
     }
 

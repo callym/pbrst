@@ -4,7 +4,7 @@ use shrinkwraprs::Shrinkwrap;
 
 use crate::prelude::*;
 
-#[derive(Copy, Clone, Debug, From, Into, Shrinkwrap)]
+#[derive(Copy, Clone, Debug, From, Into, PartialEq, Shrinkwrap)]
 #[shrinkwrap(mutable, unsafe_ignore_visibility)]
 pub struct Normal(Vector3f);
 

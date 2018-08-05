@@ -20,9 +20,11 @@ impl Primitive for TransformedPrimitive {
 
         if let Some(mut isect) = self.primitive.intersect(&mut i_ray) {
             ray.max = i_ray.max;
+            isect.primitive = Some(&*self.primitive);
 
             if !interpolated.is_identity() {
                 isect = interpolated.transform_surface_interaction(&isect);
+                assert!(isect.n.unwrap().dot(isect.shading.n) >= 0.0);
             }
 
             Some(isect)

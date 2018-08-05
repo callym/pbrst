@@ -63,6 +63,7 @@ impl Shape for Sphere {
         let dx = efloat(ray.direction.x, d_err.x);
         let dy = efloat(ray.direction.y, d_err.y);
         let dz = efloat(ray.direction.z, d_err.z);
+
         let ox = efloat(ray.origin.x, o_err.x);
         let oy = efloat(ray.origin.y, o_err.y);
         let oz = efloat(ray.origin.z, o_err.z);
@@ -91,7 +92,7 @@ impl Shape for Sphere {
 
         let mut p_hit = ray.position(*shape_hit);
 
-        p_hit *= self.radius / Point3f::zero().distance(p_hit);
+        p_hit *= self.radius / p_hit.distance(Point3f::zero());
 
         if p_hit.x == 0.0 && p_hit.y == 0.0 {
             p_hit.x = float(1e-5) * self.radius;
@@ -121,7 +122,7 @@ impl Shape for Sphere {
             let mut p_hit = ray.position(*shape_hit);
 
             // refine sphere intersection point
-            p_hit *= self.radius / Point3f::zero().distance(p_hit);
+            p_hit *= self.radius / p_hit.distance(Point3f::zero());
 
             if p_hit.x == 0.0 && p_hit.y == 0.0 {
                 p_hit.x = float(1e-5) * self.radius;
@@ -188,6 +189,7 @@ impl Shape for Sphere {
             Some(self),
             None,
         );
+
         let interaction = self.shape_data.object_to_world.transform_surface_interaction(&interaction);
 
         Some((*shape_hit, interaction))

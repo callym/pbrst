@@ -4,6 +4,9 @@ use crate::sampler::Sampler;
 mod sampler_integrator;
 pub use self::sampler_integrator::{ ParIntegratorData, SamplerIntegrator };
 
+mod normal;
+pub use self::normal::{ NormalIntegrator };
+
 mod direct_lighting;
 pub use self::direct_lighting::{ DirectLightingIntegrator, LightStrategy };
 
