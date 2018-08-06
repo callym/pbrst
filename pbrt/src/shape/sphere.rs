@@ -119,7 +119,7 @@ impl Shape for Sphere {
             }
 
             shape_hit = t1;
-            let mut p_hit = ray.position(*shape_hit);
+            p_hit = ray.position(*shape_hit);
 
             // refine sphere intersection point
             p_hit *= self.radius / p_hit.distance(Point3f::zero());

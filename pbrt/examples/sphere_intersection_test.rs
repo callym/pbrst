@@ -6,8 +6,6 @@ use std::sync::{ Arc, Mutex };
 
 use cgmath::{ Deg, Matrix4 };
 
-use pbrt::prelude::*;
-
 use pbrt::aggregate::{ BvhAccel, SplitMethod };
 use pbrt::camera::{ OrthographicCamera, PerspectiveCamera };
 use pbrt::film::Film;
@@ -23,6 +21,11 @@ use pbrt::scene::Scene;
 use pbrt::shape::{ ShapeData, Cylinder, Sphere };
 use pbrt::spectrum::{ SpectrumType, Spectrum as PbrtSpectrum };
 use pbrt::texture::ConstantTexture;
+
+use pbrt::prelude::*;
+use pbrt::camera::*;
+use pbrt::sampler::*;
+use pbrt::shape::*;
 
 fn ring(transform: Arc<Transform>, material: Box<impl Material + Clone + Send + Sync + 'static>, radius: Float, height: Float) -> (Arc<Primitive + Send>, Arc<Primitive + Send>) {
     let data = ShapeData::new(transform.clone(), false);
@@ -53,6 +56,8 @@ fn ring(transform: Arc<Transform>, material: Box<impl Material + Clone + Send + 
 }
 
 fn main() {
+    quadratic();
+    return;
     let sphere = {
         let sphere = {
             let transform = {
@@ -166,25 +171,6 @@ fn main() {
         ],
         SplitMethod::HLBVH,
     );
-    let bvh = Arc::new(bvh);
-
-    let light = {
-        let transform = Matrix4::from_translation(Vector3f::new(
-            float(5.0),
-            float(0.0),
-            float(0.0),
-        ));
-        let transform = Transform::new(transform);
-        let transform = Arc::new(transform);
-
-        let light = PointLight::new(Spectrum::from_rgb([
-                float(1.0),
-                float(1.0),
-                float(1.0),
-            ], SpectrumType::Illumination) * float(10.0),
-            transform);
-        Box::new(light)
-    };
 
     let camera = {
         let film = {
@@ -239,23 +225,107 @@ fn main() {
             film,
             None
         );
-        Arc::new(camera)
+        camera
     };
 
-    let scene = Scene::new(bvh, vec![light]);
+/*
+CameraSample {
+    p_film: Point2 { x: 375.72485, y: 240.22925 },
+    p_lens: Point2 { x: 0.5703919, y: 0.93715453 },
+    time: 0.91514564
+}
+*/
 
-    let sampler = StratifiedSampler::new(
-        4,
-        4,
-        true,
-        2,
-        123456789,
-    );
-    let sampler = Box::new(sampler);
+    let sample = CameraSample {
+        lens: Point2f::new(
+            float(0.5703919),
+            float(0.93715453)
+        ),
+        film: Point2f::new(
+            float(375.72485),
+            float(240.22925)
+        ),
+        time: float(0.91514564),
+    };
 
-//    let mut integrator = WhittedIntegrator::new(2, camera, sampler);
-    let mut integrator = DirectLightingIntegrator::new(2, LightStrategy::UniformSampleAll, camera, sampler);
-//    let mut integrator = NormalIntegrator::new(camera, sampler);
+    let (weight, mut ray) = camera.generate_ray_differential(&sample);
 
-    integrator.render(scene);
+    if let Some(si) = bvh.intersect(&mut ray) {
+        println!("si == {:#?}", si);
+    }
+
+    println!("weight == {:?}", weight);
+    println!("ray == {:#?}", ray);
+
+    let t = Matrix4::from_translation(Vector3f {
+        x: float(-1.3),
+        y: float(0.0),
+        z: float(0.0),
+    });
+    let t = Transform::new(t);
+    let o: Point3f = Point3f {
+        x: float(2.0),
+        y: float(1.99999988),
+        z: float(4.99999905),
+    };
+    let d: Vector3f = Vector3f {
+        x: float(-0.0607556403),
+        y: float(-0.164096087),
+        z: float(-0.984571517),
+    };
+    let r: Ray = Ray {
+        origin: o,
+        direction: d,
+        max: Float::infinity(),
+        time: float(0.0),
+        medium: None,
+    };
+
+    let (r, o, d) = t.transform_ray_with_error(r);
+
+    println!("{:#?}", r);
+    println!("{:?}", o);
+    println!("{:?}", d);
+}
+
+fn quadratic() {
+    let sphere = {
+        let transform = {
+            let transform = Matrix4::from_translation(Vector3f::new(
+                float(0.0),
+                float(0.0),
+                float(0.0),
+            ));
+            let rot = Matrix4::from_angle_x(Deg(float(0.0)));
+
+            Arc::new(Transform::new(transform * rot))
+        };
+
+        let data = ShapeData::new(transform, false);
+        let radius = float(1.0);
+
+        let sphere = Sphere::new(radius, -radius, float(0.0), Deg(float(360.0)), data);
+        sphere
+    };
+
+    let ray = Ray {
+        origin: Point3f::new(
+            float(0.0),
+            float(0.0),
+            float(3.0),
+        ),
+        direction: Vector3f::new(
+            float(0.0),
+            float(0.0),
+            float(-1.0),
+        ),
+        max: Float::infinity(),
+        time: float(0.0),
+        medium: None,
+    };
+
+    if let Some((f, si)) = sphere.intersect(&ray, true) {
+        println!("f == {:?}", f);
+        println!("si == {:#?}", si);
+    }
 }

@@ -117,7 +117,7 @@ impl Shape for Cylinder {
                 return None;
             }
 
-            let mut p_hit = ray.position(*shape_hit);
+            p_hit = ray.position(*shape_hit);
 
             // refine cylinder intersection point
             let hit_rad = (p_hit.x.powi(2) + p_hit.y.powi(2)).sqrt();
